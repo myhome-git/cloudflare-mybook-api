@@ -1,0 +1,21 @@
+{
+	"name": "worker-mybook",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"deploy": "wrangler deploy --env deploy",
+		"dev": "wrangler dev --port 8787",
+		"start": "wrangler dev",
+		"test": "vitest",
+		"build": "node build.js"
+	},
+	"devDependencies": {
+		"esbuild": "^0.25.8",
+		"vitest": "~3.2.0"
+	},
+	"dependencies": {
+		"hono": "^4.8.9",
+		"path": "^0.12.7"
+	}
+}

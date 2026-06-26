@@ -1,0 +1,93 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "worker-mybook",
+	"main": "src/index.js",
+	"compatibility_date": "2025-07-26",
+	"observability": {
+		"enabled": true
+	},
+	// D1数据库配置
+	"d1_databases": [
+		{
+			"binding": "DB", // Worker中通过env.DB访问
+			"database_name": "db_mybook",
+			"database_id": "123456789" // 通过wrangler d1 create获取
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "MY_BUCKET_DATABASE", // Worker中通过env.MY_BUCKET_DATABASE访问
+			"bucket_name": "bt-mybook-database",
+			"preview_bucket_name": "bt-mybook-database"
+		}
+	],
+	"minify": true,
+	// 环境变量配置
+	"vars": {
+		"USER_TOKENS": "123456789"
+	},
+	// deploy环境配置
+	"env": {
+		"deploy": {
+			"name": "worker-mybook",
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "db_mybook",
+					"database_id": "123456789"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "MY_BUCKET_DATABASE", // Worker中通过env.MY_BUCKET_DATABASE访问
+					"bucket_name": "bt-mybook-database",
+					"preview_bucket_name": "bt-mybook-database"
+				}
+			],
+			"vars": {
+				"USER_TOKENS": "123456789"
+			},
+			"minify": true,
+			"build": {
+				"command": "npm run build",
+				"cwd": ".",
+				"watch_dir": "./src"
+			},
+			"main": "./dist/index.js"
+		}
+	},
+	/**
+	 * Smart Placement
+	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
+	 */
+	// "placement": { "mode": "smart" },
+	/**
+	 * Bindings
+	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
+	 * databases, object storage, AI inference, real-time communication and more.
+	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
+	 */
+	/**
+	 * Environment Variables
+	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+	 */
+	// "vars": { "MY_VARIABLE": "production_value" },
+	/**
+	 * Note: Use secrets to store sensitive data.
+	 * https://developers.cloudflare.com/workers/configuration/secrets/
+	 */
+	/**
+	 * Static Assets
+	 * https://developers.cloudflare.com/workers/static-assets/binding/
+	 */
+	// "assets": { "directory": "./public/", "binding": "ASSETS" },
+	/**
+	 * Service Bindings (communicate between multiple Workers)
+	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
+	 */
+	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
+}
