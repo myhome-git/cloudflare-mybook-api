@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import ClassDBConnection from '../../utils/db/ClassDBConnection.js';
 import { getType, isValidValue } from '../../utils/utils.js';
-import { conf_uuidName, conf_tableName, conf_tableColumns } from '../admin/blogClass.config.js';
+import { conf_uuidName, conf_tableName, conf_tableColumns } from '../admin/books.config.js';
 
 // 定义常量
 const uuidName = conf_uuidName;
@@ -25,7 +25,8 @@ router.get('/', async (c) => {
             const value = c.getValueById(item);
             if (isValidValue(value)) {
                 if (item === "searchText") {
-                    sqlWhere += ` and d.name like ? `;
+                    sqlWhere += ` and (d.author like ? or d.title like ?) `;
+                    sqlParams.push(`%${value}%`);
                     sqlParams.push(`%${value}%`);
                 } else {
                     sqlWhere += ` and d.${item}=? `;
@@ -40,7 +41,7 @@ router.get('/', async (c) => {
                     FROM
                         ${tableName} AS d
                         ${sqlWhere} 
-                    ORDER BY d.sort ASC LIMIT ? OFFSET ?
+                    ORDER BY d.id desc LIMIT ? OFFSET ?
                     `;
         classDBConnection.open();
         let result = await classDBConnection.query(sqlValue, [...sqlParams, pageSize, pageRowNum]);
