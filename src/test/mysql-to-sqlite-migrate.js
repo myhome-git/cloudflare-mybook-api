@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { mkdirSync, stat } from 'fs';
+import { rename } from 'fs/promises';
 import { createWriteStream } from 'fs';
 import { createGzip } from 'zlib';
 import crypto from 'crypto';
@@ -31,7 +32,7 @@ class MysqlToSqliteMigration {
             database: process.env.MYSQL_DATABASE || 'db_mybook'
         };
         
-        this.sqlitePath = process.env.SQLITE_PATH || join(__dirname, '../../database/db_mybook.sqlite');
+        this.sqlitePath = process.env.SQLITE_PATH || join(__dirname, '../../.wrangler/state/v3/d1/miniflare-D1DatabaseObject/bde76e6898f3690928a64ba7d2b2f4f401890171ab6ae6b30971b12661b4b718.sqlite');
     }
 
     /**
@@ -299,12 +300,14 @@ class MysqlToSqliteMigration {
             for (const row of rows) {
                 const folder = await this.md5(`${row.bookAuthor}${row.bookTitle}`);
                 const folderIndexMd5 = await this.md5(`${row.bookAuthor}${row.bookTitle}index`);
+                const folderIndexMd5Old = await this.md5(`${row.bookAuthor}${row.bookTitle}index.json`);
                 booksToInsert.push({
                     id: row.id,
                     author: row.bookAuthor,
                     title: row.bookTitle,
                     folder: folder,
                     folder_index: folderIndexMd5,
+                    folder_index_old: folderIndexMd5Old,
                     total_chapters: row.bookSectionCount,
                     total_word_count: 0,
                     cover_url: row.bookCoverImage,
@@ -317,6 +320,58 @@ class MysqlToSqliteMigration {
             // 批量插入
             await this.batchInsertBooks(booksToInsert);
             this.printMemoryUsage('【批量插入后】');
+
+            // 批量修正数据库folder_index（使用事务大幅提升速度）
+            // console.log('\n【批量更新】开始更新 folder_index...');
+            // await new Promise((resolve, reject) => {
+            //     this.sqliteDb.serialize(() => {
+            //         this.sqliteDb.run('BEGIN TRANSACTION');
+                    
+            //         let updatedCount = 0;
+            //         let currentIndex = 0;
+                    
+            //         const processNext = () => {
+            //             if (currentIndex >= booksToInsert.length) {
+            //                 this.sqliteDb.run('COMMIT', (err) => {
+            //                     if (err) {
+            //                         console.error('事务提交失败:', err.message);
+            //                         this.sqliteDb.run('ROLLBACK');
+            //                         reject(err);
+            //                     } else {
+            //                         console.log(`【批量更新】成功更新 ${updatedCount} 条记录`);
+            //                         resolve();
+            //                     }
+            //                 });
+            //                 return;
+            //             }
+                        
+            //             const row = booksToInsert[currentIndex];
+            //             currentIndex++;
+                        
+            //             this.sqliteDb.run(
+            //                 `UPDATE tb_books SET folder_index = ? WHERE folder = ?`,
+            //                 [row.folder_index, row.folder],
+            //                 function(err) {
+            //                     if (err) {
+            //                         console.error(`更新失败 (id=${row.folder}):`, err.message);
+            //                         console.error(`SQL: UPDATE tb_books SET folder_index = ${row.folder_index} WHERE folder = ${row.folder}`);
+            //                         console.error(JSON.stringify(row, null, 2));
+            //                     } else {
+            //                         updatedCount++;
+            //                     }
+            //                     // 立即处理下一条，不等待结果
+            //                     processNext();
+            //                 }
+            //             );
+            //         };
+                    
+            //         // 启动第一批并发处理（同时处理多条，提升速度）
+            //         const concurrency = 10;
+            //         for (let i = 0; i < concurrency; i++) {
+            //             processNext();
+            //         }
+            //     });
+            // });
             
             /**
              * 文件存储逻辑每本书籍生成一个文件夹，文件名规则为MD5(author + title)，文件夹内包含：
@@ -356,6 +411,19 @@ class MysqlToSqliteMigration {
                 // 创建书籍专属文件夹
                 const bookFolder = join(folderPath, row.folder);
                 mkdirSync(bookFolder, { recursive: true });
+
+                // 如果发现旧的索引文件存在，则重命名索引文件，避免冲突
+                const oldIndexFilePath = join(bookFolder, row.folder_index_old);
+                // 尝试重命名旧索引文件（如果存在）
+                try {
+                    await rename(oldIndexFilePath, join(bookFolder, row.folder_index));
+                    console.log(`已重命名旧索引文件并更新数据库: ${oldIndexFilePath} -> ${join(bookFolder, row.folder_index)}`);
+                } catch (err) {
+                    // 旧索引文件不存在（ENOENT）是正常情况，静默跳过
+                    if (err.code !== 'ENOENT') {
+                        console.warn(`⚠️ 重命名旧索引文件失败 (${oldIndexFilePath}): ${err.message}`);
+                    }
+                }
 
                 // 判断目录中的索引文件是否存在，如果存在则跳过
                 const indexFilePath = join(bookFolder, row.folder_index);
@@ -457,11 +525,19 @@ class MysqlToSqliteMigration {
                         // 确保流正确关闭
                         writeStream.destroy();
                         resolve();
-                        // 标记当前书籍的更新时间
-                        this.sqliteDb.run(
-                            'UPDATE tb_books SET chapter_count = ?, update_time = ? WHERE folder = ?',
-                            [chapters.length || 0, new Date(), row.folder]
-                        );
+                        // 标记当前书籍的更新时间（使用 Promise 包装确保完成）
+                        new Promise((resolveDb, rejectDb) => {
+                            this.sqliteDb.run(
+                                'UPDATE tb_books SET chapter_count = ?, update_time = ? WHERE folder = ?',
+                                [chapters.length || 0, new Date(), row.folder],
+                                function(err) {
+                                    if (err) console.error('更新书籍信息失败:', err.message);
+                                    resolveDb();
+                                }
+                            );
+                        }).then(() => {
+                            resolve();
+                        }).catch(reject);
                     });
                     
                     // 写入 JSON 数据并结束流

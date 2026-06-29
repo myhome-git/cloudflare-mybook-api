@@ -2588,7 +2588,6 @@ var ClassDBConnection = class {
     if (/^SELECT\b(?!\s+COUNT\b)/i.test(newValue)) {
       value = `
                     SELECT
-                        ROW_NUMBER() OVER() AS row_num,
                         result.id AS 'row_key',
                         result.*
                     FROM (
@@ -3439,6 +3438,7 @@ router7.get("/list", async (c) => {
     });
     sqlValue = `
                     SELECT
+                        ROW_NUMBER() OVER(ORDER BY id DESC) AS row_num,
                         d.*
                     FROM
                         ${tableName3} AS d

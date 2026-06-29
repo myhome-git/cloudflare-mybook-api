@@ -22,6 +22,6 @@
   ],
   "vars": {
     "USER_TOKENS": "123456789",
-    "BOOKS_URL": "https://api.openai.com/v1/chat/completions"
+    "BOOKS_URL": "http://127.0.0.1:82/chapters"
   }
 }

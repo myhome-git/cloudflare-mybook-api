@@ -92,9 +92,17 @@ class ClassDBConnection {
         const newValue = value.replace(/^\s+/g, "");
         // 如果是select语句，则进行打包
         if (/^SELECT\b(?!\s+COUNT\b)/i.test(newValue)) {
+            // value = `
+            //         SELECT
+            //             ROW_NUMBER() OVER() AS row_num,
+            //             result.id AS 'row_key',
+            //             result.*
+            //         FROM (
+            //                 ${value}
+            //             ) AS result
+            //         `;
             value = `
                     SELECT
-                        ROW_NUMBER() OVER() AS row_num,
                         result.id AS 'row_key',
                         result.*
                     FROM (

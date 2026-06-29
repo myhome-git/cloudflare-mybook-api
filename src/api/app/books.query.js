@@ -37,6 +37,7 @@ router.get('/list', async (c) => {
 
         sqlValue = `
                     SELECT
+                        ROW_NUMBER() OVER(ORDER BY id DESC) AS row_num,
                         d.*
                     FROM
                         ${tableName} AS d
