@@ -1,186 +1,3367 @@
-var Ne=(t,e,r)=>(s,n)=>{let a=-1;return o(0);async function o(l){if(l<=a)throw new Error("next() called multiple times");a=l;let c,i=!1,u;if(t[l]?(u=t[l][0][0],s.req.routeIndex=l):u=l===t.length&&n||void 0,u)try{c=await u(s,()=>o(l+1))}catch(d){if(d instanceof Error&&e)s.error=d,c=await e(d,s),i=!0;else throw d}else s.finalized===!1&&r&&(c=await r(s));return c&&(s.finalized===!1||i)&&(s.res=c),s}};var ot=Symbol();var lt=async(t,e=Object.create(null))=>{let{all:r=!1,dot:s=!1}=e,a=(t instanceof pe?t.raw.headers:t.headers).get("Content-Type");return a?.startsWith("multipart/form-data")||a?.startsWith("application/x-www-form-urlencoded")?Ar(t,{all:r,dot:s}):{}};async function Ar(t,e){let r=await t.formData();return r?Or(r,e):{}}function Or(t,e){let r=Object.create(null);return t.forEach((s,n)=>{e.all||n.endsWith("[]")?Dr(r,n,s):r[n]=s}),e.dot&&Object.entries(r).forEach(([s,n])=>{s.includes(".")&&(Br(r,s,n),delete r[s])}),r}var Dr=(t,e,r)=>{t[e]!==void 0?Array.isArray(t[e])?t[e].push(r):t[e]=[t[e],r]:e.endsWith("[]")?t[e]=[r]:t[e]=r},Br=(t,e,r)=>{if(/(?:^|\.)__proto__\./.test(e))return;let s=t,n=e.split(".");n.forEach((a,o)=>{o===n.length-1?s[a]=r:((!s[a]||typeof s[a]!="object"||Array.isArray(s[a])||s[a]instanceof File)&&(s[a]=Object.create(null)),s=s[a])})};var Oe=t=>{let e=t.split("/");return e[0]===""&&e.shift(),e},it=t=>{let{groups:e,path:r}=Vr(t),s=Oe(r);return Pr(s,e)},Vr=t=>{let e=[];return t=t.replace(/\{[^}]+\}/g,(r,s)=>{let n=`@${s}`;return e.push([n,r]),n}),{groups:e,path:t}},Pr=(t,e)=>{for(let r=e.length-1;r>=0;r--){let[s]=e[r];for(let n=t.length-1;n>=0;n--)if(t[n].includes(s)){t[n]=t[n].replace(s,e[r][1]);break}}return t},me={},ct=(t,e)=>{if(t==="*")return"*";let r=t.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);if(r){let s=`${t}#${e}`;return me[s]||(r[2]?me[s]=e&&e[0]!==":"&&e[0]!=="*"?[s,r[1],new RegExp(`^${r[2]}(?=/${e})`)]:[t,r[1],new RegExp(`^${r[2]}$`)]:me[s]=[t,r[1],!0]),me[s]}return null},ge=(t,e)=>{try{return e(t)}catch{return t.replace(/(?:%[0-9A-Fa-f]{2})+/g,r=>{try{return e(r)}catch{return r}})}},Ir=t=>ge(t,decodeURI),De=t=>{let e=t.url,r=e.indexOf("/",e.indexOf(":")+4),s=r;for(;s<e.length;s++){let n=e.charCodeAt(s);if(n===37){let a=e.indexOf("?",s),o=e.indexOf("#",s),l=a===-1?o===-1?void 0:o:o===-1?a:Math.min(a,o),c=e.slice(r,l);return Ir(c.includes("%25")?c.replace(/%25/g,"%2525"):c)}else if(n===63||n===35)break}return e.slice(r,s)};var ut=t=>{let e=De(t);return e.length>1&&e.at(-1)==="/"?e.slice(0,-1):e},O=(t,e,...r)=>(r.length&&(e=O(e,...r)),`${t?.[0]==="/"?"":"/"}${t}${e==="/"?"":`${t?.at(-1)==="/"?"":"/"}${e?.[0]==="/"?e.slice(1):e}`}`),ye=t=>{if(t.charCodeAt(t.length-1)!==63||!t.includes(":"))return null;let e=t.split("/"),r=[],s="";return e.forEach(n=>{if(n!==""&&!/\:/.test(n))s+="/"+n;else if(/\:/.test(n))if(/\?/.test(n)){r.length===0&&s===""?r.push("/"):r.push(s);let a=n.replace("?","");s+="/"+a,r.push(s)}else s+="/"+n}),r.filter((n,a,o)=>o.indexOf(n)===a)},Ae=t=>/[%+]/.test(t)?(t.indexOf("+")!==-1&&(t=t.replace(/\+/g," ")),t.indexOf("%")!==-1?ge(t,Be):t):t,dt=(t,e,r)=>{let s;if(!r&&e&&!/[%+]/.test(e)){let o=t.indexOf("?",8);if(o===-1)return;for(t.startsWith(e,o+1)||(o=t.indexOf(`&${e}`,o+1));o!==-1;){let l=t.charCodeAt(o+e.length+1);if(l===61){let c=o+e.length+2,i=t.indexOf("&",c);return Ae(t.slice(c,i===-1?void 0:i))}else if(l==38||isNaN(l))return"";o=t.indexOf(`&${e}`,o+1)}if(s=/[%+]/.test(t),!s)return}let n={};s??=/[%+]/.test(t);let a=t.indexOf("?",8);for(;a!==-1;){let o=t.indexOf("&",a+1),l=t.indexOf("=",a);l>o&&o!==-1&&(l=-1);let c=t.slice(a+1,l===-1?o===-1?void 0:o:l);if(s&&(c=Ae(c)),a=o,c==="")continue;let i;l===-1?i="":(i=t.slice(l+1,o===-1?void 0:o),s&&(i=Ae(i))),r?(n[c]&&Array.isArray(n[c])||(n[c]=[]),n[c].push(i)):n[c]??=i}return e?n[e]:n},ft=dt,ht=(t,e)=>dt(t,e,!0),Be=decodeURIComponent;var pt=t=>ge(t,Be),pe=class{raw;#t;#e;routeIndex=0;path;bodyCache={};constructor(t,e="/",r=[[]]){this.raw=t,this.path=e,this.#e=r,this.#t={}}param(t){return t?this.#r(t):this.#a()}#r(t){let e=this.#e[0][this.routeIndex][1][t],r=this.#n(e);return r&&/\%/.test(r)?pt(r):r}#a(){let t={},e=Object.keys(this.#e[0][this.routeIndex][1]);for(let r of e){let s=this.#n(this.#e[0][this.routeIndex][1][r]);s!==void 0&&(t[r]=/\%/.test(s)?pt(s):s)}return t}#n(t){return this.#e[1]?this.#e[1][t]:t}query(t){return ft(this.url,t)}queries(t){return ht(this.url,t)}header(t){if(t)return this.raw.headers.get(t)??void 0;let e={};return this.raw.headers.forEach((r,s)=>{e[s]=r}),e}async parseBody(t){return lt(this,t)}#s=t=>{let{bodyCache:e,raw:r}=this,s=e[t];if(s)return s;let n=Object.keys(e)[0];return n?e[n].then(a=>(n==="json"&&(a=JSON.stringify(a)),new Response(a)[t]())):e[t]=r[t]()};json(){return this.#s("text").then(t=>JSON.parse(t))}text(){return this.#s("text")}arrayBuffer(){return this.#s("arrayBuffer")}bytes(){return this.#s("arrayBuffer").then(t=>new Uint8Array(t))}blob(){return this.#s("blob")}formData(){return this.#s("formData")}addValidatedData(t,e){this.#t[t]=e}valid(t){return this.#t[t]}get url(){return this.raw.url}get method(){return this.raw.method}get[ot](){return this.#e}get routePath(){return this.#e[0].map(([[,t]])=>t)[this.routeIndex].path}};var mt={Stringify:1,BeforeStream:2,Stream:3},vr=(t,e)=>{let r=new String(t);return r.isEscaped=!0,r.callbacks=e,r};var Ve=async(t,e,r,s,n)=>{typeof t=="object"&&!(t instanceof String)&&(t instanceof Promise||(t=t.toString()),t instanceof Promise&&(t=await t));let a=t.callbacks;if(!a?.length)return Promise.resolve(t);n?n[0]+=t:n=[t];let o=Promise.all(a.map(l=>l({phase:e,buffer:n,context:s}))).then(l=>Promise.all(l.filter(Boolean).map(c=>Ve(c,e,!1,s,n))).then(()=>n[0]));return r?vr(await o,a):o};var Mr="text/plain; charset=UTF-8",Pe=(t,e)=>({"Content-Type":t,...e}),ne=(t,e)=>new Response(t,e),Ie=class{#t;#e;env={};#r;finalized=!1;error;#a;#n;#s;#u;#i;#c;#l;#d;#f;constructor(t,e){this.#t=t,e&&(this.#n=e.executionCtx,this.env=e.env,this.#c=e.notFoundHandler,this.#f=e.path,this.#d=e.matchResult)}get req(){return this.#e??=new pe(this.#t,this.#f,this.#d),this.#e}get event(){if(this.#n&&"respondWith"in this.#n)return this.#n;throw Error("This context has no FetchEvent")}get executionCtx(){if(this.#n)return this.#n;throw Error("This context has no ExecutionContext")}get res(){return this.#s||=ne(null,{headers:this.#l??=new Headers})}set res(t){if(this.#s&&t){t=ne(t.body,t);for(let[e,r]of this.#s.headers.entries())if(e!=="content-type")if(e==="set-cookie"){let s=this.#s.headers.getSetCookie();t.headers.delete("set-cookie");for(let n of s)t.headers.append("set-cookie",n)}else t.headers.set(e,r)}this.#s=t,this.finalized=!0}render=(...t)=>(this.#i??=e=>this.html(e),this.#i(...t));setLayout=t=>this.#u=t;getLayout=()=>this.#u;setRenderer=t=>{this.#i=t};header=(t,e,r)=>{this.finalized&&(this.#s=ne(this.#s.body,this.#s));let s=this.#s?this.#s.headers:this.#l??=new Headers;e===void 0?s.delete(t):r?.append?s.append(t,e):s.set(t,e)};status=t=>{this.#a=t};set=(t,e)=>{this.#r??=new Map,this.#r.set(t,e)};get=t=>this.#r?this.#r.get(t):void 0;get var(){return this.#r?Object.fromEntries(this.#r):{}}#o(t,e,r){let s=this.#s?new Headers(this.#s.headers):this.#l??new Headers;if(typeof e=="object"&&"headers"in e){let a=e.headers instanceof Headers?e.headers:new Headers(e.headers);for(let[o,l]of a)o.toLowerCase()==="set-cookie"?s.append(o,l):s.set(o,l)}if(r)for(let[a,o]of Object.entries(r))if(typeof o=="string")s.set(a,o);else{s.delete(a);for(let l of o)s.append(a,l)}let n=typeof e=="number"?e:e?.status??this.#a;return ne(t,{status:n,headers:s})}newResponse=(...t)=>this.#o(...t);body=(t,e,r)=>this.#o(t,e,r);text=(t,e,r)=>!this.#l&&!this.#a&&!e&&!r&&!this.finalized?new Response(t):this.#o(t,e,Pe(Mr,r));json=(t,e,r)=>this.#o(JSON.stringify(t),e,Pe("application/json",r));html=(t,e,r)=>{let s=n=>this.#o(n,e,Pe("text/html; charset=UTF-8",r));return typeof t=="object"?Ve(t,mt.Stringify,!1,{}).then(s):s(t)};redirect=(t,e)=>{let r=String(t);return this.header("Location",/[^\x00-\xFF]/.test(r)?encodeURI(r):r),this.newResponse(null,e??302)};notFound=()=>(this.#c??=()=>ne(),this.#c(this))};var q="ALL",gt="all",yt=["get","post","put","delete","options","patch"],we="Can not add a route since the matcher is already built.",Ee=class extends Error{};var wt="__COMPOSED_HANDLER";var Hr=t=>t.text("404 Not Found",404),Et=(t,e)=>{if("getResponse"in t){let r=t.getResponse();return e.newResponse(r.body,r)}return e.text("Internal Server Error",500)},St=class bt{get;post;put;delete;options;patch;all;on;use;router;getPath;_basePath="/";#t="/";routes=[];constructor(e={}){[...yt,gt].forEach(a=>{this[a]=(o,...l)=>(typeof o=="string"?this.#t=o:this.#a(a,this.#t,o),l.forEach(c=>{this.#a(a,this.#t,c)}),this)}),this.on=(a,o,...l)=>{for(let c of[o].flat()){this.#t=c;for(let i of[a].flat())l.map(u=>{this.#a(i.toUpperCase(),this.#t,u)})}return this},this.use=(a,...o)=>(typeof a=="string"?this.#t=a:(this.#t="*",o.unshift(a)),o.forEach(l=>{this.#a(q,this.#t,l)}),this);let{strict:s,...n}=e;Object.assign(this,n),this.getPath=s??!0?e.getPath??De:ut}#e(){let e=new bt({router:this.router,getPath:this.getPath});return e.errorHandler=this.errorHandler,e.#r=this.#r,e.routes=this.routes,e}#r=Hr;errorHandler=Et;route(e,r){let s=this.basePath(e);return r.routes.map(n=>{let a;r.errorHandler===Et?a=n.handler:(a=async(o,l)=>(await Ne([],r.errorHandler)(o,()=>n.handler(o,l))).res,a[wt]=n.handler),s.#a(n.method,n.path,a,n.basePath)}),this}basePath(e){let r=this.#e();return r._basePath=O(this._basePath,e),r}notFound=e=>(this.#r=e,this);mount(e,r,s){let n,a;s&&(typeof s=="function"?a=s:(a=s.optionHandler,s.replaceRequest===!1?n=c=>c:n=s.replaceRequest));let o=a?c=>{let i=a(c);return Array.isArray(i)?i:[i]}:c=>{let i;try{i=c.executionCtx}catch{}return[c.env,i]};n||=(()=>{let c=O(this._basePath,e),i=c==="/"?0:c.length;return u=>{let d=new URL(u.url);return d.pathname=this.getPath(u).slice(i)||"/",new Request(d,u)}})();let l=async(c,i)=>{let u=await r(n(c.req.raw),...o(c));if(u)return u;await i()};return this.#a(q,O(e,"*"),l),this}#a(e,r,s,n){e=e.toUpperCase(),r=O(this._basePath,r);let a={basePath:n!==void 0?O(this._basePath,n):this._basePath,path:r,method:e,handler:s};this.router.add(e,r,[s,a]),this.routes.push(a)}#n(e,r){if(e instanceof Error)return this.errorHandler(e,r);throw e}#s(e,r,s,n){if(n==="HEAD")return(async()=>new Response(null,await this.#s(e,r,s,"GET")))();let a=this.getPath(e,{env:s}),o=this.router.match(n,a),l=new Ie(e,{path:a,matchResult:o,env:s,executionCtx:r,notFoundHandler:this.#r});if(o[0].length===1){let i;try{i=o[0][0][0][0](l,async()=>{l.res=await this.#r(l)})}catch(u){return this.#n(u,l)}return i instanceof Promise?i.then(u=>u||(l.finalized?l.res:this.#r(l))).catch(u=>this.#n(u,l)):i??this.#r(l)}let c=Ne(o[0],this.errorHandler,this.#r);return(async()=>{try{let i=await c(l);if(!i.finalized)throw new Error("Context is not finalized. Did you forget to return a Response object or `await next()`?");return i.res}catch(i){return this.#n(i,l)}})()}fetch=(e,...r)=>this.#s(e,r[1],r[0],e.method);request=(e,r,s,n)=>e instanceof Request?this.fetch(r?new Request(e,r):e,s,n):(e=e.toString(),this.fetch(new Request(/^https?:\/\//.test(e)?e:`http://localhost${O("/",e)}`,r),s,n));fire=()=>{addEventListener("fetch",e=>{e.respondWith(this.#s(e.request,e,void 0,e.request.method))})}};var Se=[];function ve(t,e){let r=this.buildAllMatchers(),s=((n,a)=>{let o=r[n]||r[q],l=o[2][a];if(l)return l;let c=a.match(o[0]);if(!c)return[[],Se];let i=c.indexOf("",1);return[o[1][i],c]});return this.match=s,s(t,e)}var be="[^/]+",ae=".*",oe="(?:|/.*)",I=Symbol(),Fr=new Set(".\\+*[^]$()");function jr(t,e){return t.length===1?e.length===1?t<e?-1:1:-1:e.length===1||t===ae||t===oe?1:e===ae||e===oe?-1:t===be?1:e===be?-1:t.length===e.length?t<e?-1:1:e.length-t.length}var Ct=class Me{#t;#e;#r=Object.create(null);insert(e,r,s,n,a){if(e.length===0){if(this.#t!==void 0)throw I;if(a)return;this.#t=r;return}let[o,...l]=e,c=o==="*"?l.length===0?["","",ae]:["","",be]:o==="/*"?["","",oe]:o.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/),i;if(c){let u=c[1],d=c[2]||be;if(u&&c[2]&&(d===".*"||(d=d.replace(/^\((?!\?:)(?=[^)]+\)$)/,"(?:"),/\((?!\?:)/.test(d))))throw I;if(i=this.#r[d],!i){if(Object.keys(this.#r).some(f=>f!==ae&&f!==oe))throw I;if(a)return;i=this.#r[d]=new Me,u!==""&&(i.#e=n.varIndex++)}!a&&u!==""&&s.push([u,i.#e])}else if(i=this.#r[o],!i){if(Object.keys(this.#r).some(u=>u.length>1&&u!==ae&&u!==oe))throw I;if(a)return;i=this.#r[o]=new Me}i.insert(l,r,s,n,a)}buildRegExpStr(){let r=Object.keys(this.#r).sort(jr).map(s=>{let n=this.#r[s];return(typeof n.#e=="number"?`(${s})@${n.#e}`:Fr.has(s)?`\\${s}`:s)+n.buildRegExpStr()});return typeof this.#t=="number"&&r.unshift(`#${this.#t}`),r.length===0?"":r.length===1?r[0]:"(?:"+r.join("|")+")"}};var qt=class{#t={varIndex:0};#e=new Ct;insert(t,e,r){let s=[],n=[];for(let o=0;;){let l=!1;if(t=t.replace(/\{[^}]+\}/g,c=>{let i=`@\\${o}`;return n[o]=[i,c],o++,l=!0,i}),!l)break}let a=t.match(/(?::[^\/]+)|(?:\/\*$)|./g)||[];for(let o=n.length-1;o>=0;o--){let[l]=n[o];for(let c=a.length-1;c>=0;c--)if(a[c].indexOf(l)!==-1){a[c]=a[c].replace(l,n[o][1]);break}}return this.#e.insert(a,e,s,this.#t,r),s}buildRegExp(){let t=this.#e.buildRegExpStr();if(t==="")return[/^$/,[],[]];let e=0,r=[],s=[];return t=t.replace(/#(\d+)|@(\d+)|\.\*\$/g,(n,a,o)=>a!==void 0?(r[++e]=Number(a),"$()"):(o!==void 0&&(s[Number(o)]=++e),"")),[new RegExp(`^${t}`),r,s]}};var Lr=[/^$/,[],Object.create(null)],Rt=Object.create(null);function xt(t){return Rt[t]??=new RegExp(t==="*"?"":`^${t.replace(/\/\*$|([.\\+*[^\]$()])/g,(e,r)=>r?`\\${r}`:"(?:|/.*)")}$`)}function kr(){Rt=Object.create(null)}function Wr(t){let e=new qt,r=[];if(t.length===0)return Lr;let s=t.map(i=>[!/\*|\/:/.test(i[0]),...i]).sort(([i,u],[d,f])=>i?1:d?-1:u.length-f.length),n=Object.create(null);for(let i=0,u=-1,d=s.length;i<d;i++){let[f,h,p]=s[i];f?n[h]=[p.map(([E])=>[E,Object.create(null)]),Se]:u++;let g;try{g=e.insert(h,u,f)}catch(E){throw E===I?new Ee(h):E}f||(r[u]=p.map(([E,b])=>{let x=Object.create(null);for(b-=1;b>=0;b--){let[y,C]=g[b];x[y]=C}return[E,x]}))}let[a,o,l]=e.buildRegExp();for(let i=0,u=r.length;i<u;i++)for(let d=0,f=r[i].length;d<f;d++){let h=r[i][d]?.[1];if(!h)continue;let p=Object.keys(h);for(let g=0,E=p.length;g<E;g++)h[p[g]]=l[h[p[g]]]}let c=[];for(let i in o)c[i]=r[o[i]];return[a,c,n]}function U(t,e){if(t){for(let r of Object.keys(t).sort((s,n)=>n.length-s.length))if(xt(r).test(e))return[...t[r]]}}var Ce=class{name="RegExpRouter";#t;#e;constructor(){this.#t={[q]:Object.create(null)},this.#e={[q]:Object.create(null)}}add(t,e,r){let s=this.#t,n=this.#e;if(!s||!n)throw new Error(we);s[t]||[s,n].forEach(l=>{l[t]=Object.create(null),Object.keys(l[q]).forEach(c=>{l[t][c]=[...l[q][c]]})}),e==="/*"&&(e="*");let a=(e.match(/\/:/g)||[]).length;if(/\*$/.test(e)){let l=xt(e);t===q?Object.keys(s).forEach(c=>{s[c][e]||=U(s[c],e)||U(s[q],e)||[]}):s[t][e]||=U(s[t],e)||U(s[q],e)||[],Object.keys(s).forEach(c=>{(t===q||t===c)&&Object.keys(s[c]).forEach(i=>{l.test(i)&&s[c][i].push([r,a])})}),Object.keys(n).forEach(c=>{(t===q||t===c)&&Object.keys(n[c]).forEach(i=>l.test(i)&&n[c][i].push([r,a]))});return}let o=ye(e)||[e];for(let l=0,c=o.length;l<c;l++){let i=o[l];Object.keys(n).forEach(u=>{(t===q||t===u)&&(n[u][i]||=[...U(s[u],i)||U(s[q],i)||[]],n[u][i].push([r,a-c+l+1]))})}}match=ve;buildAllMatchers(){let t=Object.create(null);return Object.keys(this.#e).concat(Object.keys(this.#t)).forEach(e=>{t[e]||=this.#r(e)}),this.#t=this.#e=void 0,kr(),t}#r(t){let e=[],r=t===q;return[this.#t,this.#e].forEach(s=>{let n=s[t]?Object.keys(s[t]).map(a=>[a,s[t][a]]):[];n.length!==0?(r||=!0,e.push(...n)):t!==q&&e.push(...Object.keys(s[q]).map(a=>[a,s[q][a]]))}),r?Wr(e):null}};var He=class{name="SmartRouter";#t=[];#e=[];constructor(t){this.#t=t.routers}add(t,e,r){if(!this.#e)throw new Error(we);this.#e.push([t,e,r])}match(t,e){if(!this.#e)throw new Error("Fatal error");let r=this.#t,s=this.#e,n=r.length,a=0,o;for(;a<n;a++){let l=r[a];try{for(let c=0,i=s.length;c<i;c++)l.add(...s[c]);o=l.match(t,e)}catch(c){if(c instanceof Ee)continue;throw c}this.match=l.match.bind(l),this.#t=[l],this.#e=void 0;break}if(a===n)throw new Error("Fatal error");return this.name=`SmartRouter + ${this.activeRouter.name}`,o}get activeRouter(){if(this.#e||this.#t.length!==1)throw new Error("No active router has been determined yet.");return this.#t[0]}};var le=Object.create(null),Yr=t=>{for(let e in t)return!0;return!1},_t=class Tt{#t;#e;#r;#a=0;#n=le;constructor(e,r,s){if(this.#e=s||Object.create(null),this.#t=[],e&&r){let n=Object.create(null);n[e]={handler:r,possibleKeys:[],score:0},this.#t=[n]}this.#r=[]}insert(e,r,s){this.#a=++this.#a;let n=this,a=it(r),o=[];for(let l=0,c=a.length;l<c;l++){let i=a[l],u=a[l+1],d=ct(i,u),f=Array.isArray(d)?d[0]:i;if(f in n.#e){n=n.#e[f],d&&o.push(d[1]);continue}n.#e[f]=new Tt,d&&(n.#r.push(d),o.push(d[1])),n=n.#e[f]}return n.#t.push({[e]:{handler:s,possibleKeys:o.filter((l,c,i)=>i.indexOf(l)===c),score:this.#a}}),n}#s(e,r,s,n,a){for(let o=0,l=r.#t.length;o<l;o++){let c=r.#t[o],i=c[s]||c[q],u={};if(i!==void 0&&(i.params=Object.create(null),e.push(i),n!==le||a&&a!==le))for(let d=0,f=i.possibleKeys.length;d<f;d++){let h=i.possibleKeys[d],p=u[i.score];i.params[h]=a?.[h]&&!p?a[h]:n[h]??a?.[h],u[i.score]=!0}}}search(e,r){let s=[];this.#n=le;let a=[this],o=Oe(r),l=[],c=o.length,i=null;for(let u=0;u<c;u++){let d=o[u],f=u===c-1,h=[];for(let g=0,E=a.length;g<E;g++){let b=a[g],x=b.#e[d];x&&(x.#n=b.#n,f?(x.#e["*"]&&this.#s(s,x.#e["*"],e,b.#n),this.#s(s,x,e,b.#n)):h.push(x));for(let y=0,C=b.#r.length;y<C;y++){let nt=b.#r[y],A=b.#n===le?{}:{...b.#n};if(nt==="*"){let Y=b.#e["*"];Y&&(this.#s(s,Y,e,b.#n),Y.#n=A,h.push(Y));continue}let[Nr,at,re]=nt;if(!d&&!(re instanceof RegExp))continue;let $=b.#e[Nr];if(re instanceof RegExp){if(i===null){i=new Array(c);let he=r[0]==="/"?1:0;for(let se=0;se<c;se++)i[se]=he,he+=o[se].length+1}let Y=r.substring(i[u]),$e=re.exec(Y);if($e){if(A[at]=$e[0],this.#s(s,$,e,b.#n,A),Yr($.#e)){$.#n=A;let he=$e[0].match(/\//)?.length??0;(l[he]||=[]).push($)}continue}}(re===!0||re.test(d))&&(A[at]=d,f?(this.#s(s,$,e,A,b.#n),$.#e["*"]&&this.#s(s,$.#e["*"],e,A,b.#n)):($.#n=A,h.push($)))}}let p=l.shift();a=p?h.concat(p):h}return s.length>1&&s.sort((u,d)=>u.score-d.score),[s.map(({handler:u,params:d})=>[u,d])]}};var Fe=class{name="TrieRouter";#t;constructor(){this.#t=new _t}add(t,e,r){let s=ye(e);if(s){for(let n=0,a=s.length;n<a;n++)this.#t.insert(t,s[n],r);return}this.#t.insert(t,e,r)}match(t,e){return this.#t.search(t,e)}};var w=class extends St{constructor(t={}){super(t),this.router=t.router??new He({routers:[new Ce,new Fe]})}};var $t=t=>{let e={origin:"*",allowMethods:["GET","HEAD","PUT","POST","DELETE","PATCH"],allowHeaders:[],exposeHeaders:[],...t},r=(n=>typeof n=="string"?n==="*"?()=>n:a=>n===a?a:null:typeof n=="function"?n:a=>n.includes(a)?a:null)(e.origin),s=(n=>typeof n=="function"?n:Array.isArray(n)?()=>n:()=>[])(e.allowMethods);return async function(a,o){function l(i,u){a.res.headers.set(i,u)}let c=await r(a.req.header("origin")||"",a);if(c&&l("Access-Control-Allow-Origin",c),e.credentials&&l("Access-Control-Allow-Credentials","true"),e.exposeHeaders?.length&&l("Access-Control-Expose-Headers",e.exposeHeaders.join(",")),a.req.method==="OPTIONS"){e.origin!=="*"&&l("Vary","Origin"),e.maxAge!=null&&l("Access-Control-Max-Age",e.maxAge.toString());let i=await s(a.req.header("origin")||"",a);i.length&&l("Access-Control-Allow-Methods",i.join(","));let u=e.allowHeaders;if(!u?.length){let d=a.req.header("Access-Control-Request-Headers");d&&(u=d.split(/\s*,\s*/))}return u?.length&&(l("Access-Control-Allow-Headers",u.join(",")),a.res.headers.append("Vary","Access-Control-Request-Headers")),a.res.headers.delete("Content-Length"),a.res.headers.delete("Content-Type"),new Response(null,{headers:a.res.headers,status:204,statusText:"No Content"})}await o(),e.origin!=="*"&&a.header("Vary","Origin",{append:!0})}};var Ur={corsSwitch:!0,methods:["GET","POST","PUT","DELETE","OPTIONS"],file_upload_max_size:104857600},z=Ur;var zr={Worker:{request_max_count:9e4},cloudflare_kv:{save_size:9663676416e-1,read_max_count:9e5,write_max_count:9e6,delete_max_count:9e6,list_max_count:9e6},cloudflare_d1:{database_max_count:3,database_save_size:9663676416,read_max_count:4e7,write_max_count:4e6},cloudflare_r2:{save_size:9437184}},Nt=zr;var R=t=>Object.prototype.toString.call(t).slice(8,-1),T={Object:"Object",Array:"Array",Date:"Date",RegExp:"RegExp",Function:"Function",Null:"Null",Undefined:"Undefined",Number:"Number",String:"String",Boolean:"Boolean"};function S(t){return t==null||typeof t=="string"&&t.trim()===""||Array.isArray(t)&&t.length===0?!1:typeof t=="object"&&!Array.isArray(t)?Object.keys(t).length!==0:!(typeof t=="number"&&isNaN(t))}async function ie(t){let e=new TextEncoder().encode(t),r=await crypto.subtle.digest("MD5",e);return Array.from(new Uint8Array(r)).map(n=>n.toString(16).padStart(2,"0")).join("")}async function At(t){let e;t instanceof Blob?e=await t.arrayBuffer():typeof t=="string"?e=new TextEncoder().encode(t):t instanceof ArrayBuffer?e=t:t&&t.buffer instanceof ArrayBuffer?e=t.buffer:e=new TextEncoder().encode(String(t));let r=await crypto.subtle.digest("MD5",e);return Array.from(new Uint8Array(r)).map(n=>n.toString(16).padStart(2,"0")).join("")}function Ot(t){return/^-?\d*\.?\d+$/.test(String(t))}function _(t=Date.now(),e="YYYY-MM-DD HH:mm:ss"){let r=new Date(t),s=r.getFullYear(),n=String(r.getMonth()+1).padStart(2,"0"),a=String(r.getDate()).padStart(2,"0"),o=String(r.getHours()).padStart(2,"0"),l=String(r.getMinutes()).padStart(2,"0"),c=String(r.getSeconds()).padStart(2,"0"),i=e.replace("YYYY",s);return i=i.replace("MM",n),i=i.replace("DD",a),i=i.replace("HH",o),i=i.replace("mm",l),i=i.replace("ss",c),i}function je(t=Date.now(),e="1M"){let r=e.match(/^(\d+)([yMdHms])$/);if(!r)return;let s=parseInt(r[1],10),n=r[2];if(s<1)return;let a=new Date(t);switch(n){case"y":a.setFullYear(a.getFullYear()-s);break;case"M":a.setMonth(a.getMonth()-s);break;case"d":a.setDate(a.getDate()-s);break;case"H":a.setHours(a.getHours()-s);break;case"m":a.setMinutes(a.getMinutes()-s);break;case"s":a.setSeconds(a.getSeconds()-s);break;default:return}return a.getTime()}function Dt(t){if(t===0)return"0 Bytes";let e=1024,r=["Bytes","KB","MB","GB","TB"],s=Math.floor(Math.log(t)/Math.log(e));return parseFloat((t/Math.pow(e,s)).toFixed(2))+" "+r[s]}var Bt="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz[]{}:/,";function Le(t,e){let r=[],s="";e=encodeURIComponent(e);for(var n=0;n<128;n++){r[n]=String.fromCharCode(n);var a=Bt.indexOf(r[n]);a>-1&&(r[n]=t.substring(a,a+1))}for(var n in e)s=s+r[e.charCodeAt(n)];return s.replace(/(\-*$)/g,"")}function D(t,e){let r=[],s="";for(var n=0;n<128;n++){r[n]=String.fromCharCode(n);var a=Bt.indexOf(r[n]);a>-1&&(r[n]=t.substring(a,a+1))}var o=e;for(var n in o){for(var l=o[n],c=-1,i=0;i<128;i++)if(r[i]==l){c=i;break}s=s+String.fromCharCode(c)}try{s=decodeURIComponent(s)}catch{}return s}function Vt(t){let e=t.env.USER_TOKENS;if(R(e)!==T.String)return!1;let r=Kr(t).token;return!(!S(r)||e!==r)}function Kr(t){return t.req.header()}async function Pt(t){let e=t.header("content-type")||"",r={};if(new URL(t.url).searchParams.forEach((n,a)=>{r[a]=n}),t.method!=="GET"){if(e.includes("application/json")){let n=await t.json();n&&(R(n)===T.Array?r=n:R(n)===T.Object&&(r={...r,...n}))}else if(e.includes("form-data")){let n=await t.formData();for(let[a,o]of n.entries())r[a]=o}else if(e.includes("x-www-form-urlencoded")){let n=await t.text();new URLSearchParams(n).forEach((a,o)=>{r[o]=a})}t.__body=r}else t.__query=r;return t}async function It(t){let e=t.request||t.req;e.headers=e.raw.headers,e=await Pt(e);let r={getValues:Gr,getValuesPage:Jr,getValueByIdToArray:Qr,getValueByIdToObject:Xr,getValueById:Zr};return Object.keys(r).forEach(s=>{e[s]=r[s],t[s]=r[s]}),t.getValues=function(){return this.req.getValues()},t}function Gr(){return this.method==="GET"?this.__query:this.__body}function Jr(){let t=this.getValues()||{};try{let{index:e,size:r}=t;e=Number(e),Number.isNaN(e)&&(e=1),r=Number(r),Number.isNaN(r)&&(r=30),t.pageIndex=e,t.pageSize=r,t.pageRowNum=(e-1)*r}catch(e){throw e}return t}function Qr(t,e){let r=e||this.getValues(),s=[];return t.map(n=>{s.push(r[n])}),s}function Xr(t,e){let r=e||this.getValues(),s={};return t.map(n=>{s[n]=r[n]}),s}function Zr(t){return this.getValues()[t]}function vt(t){let e={sendSuccess:es,sendWarning:rs,sendError:ts};return Object.keys(e).forEach(r=>{t[r]=e[r]}),t}function es(t){let e={status:200,message:"success"};return t instanceof Error?this.sendError(t):(R(t)===T.Object?e=Object.assign(e,t):R(t)===T.String&&(e=Object.assign(e,{message:t})),ke(e,this))}function ts(t){let e={status:500,message:"error"};return t instanceof Error?e=Object.assign(e,{message:t.message||"error"}):R(t)===T.Object?e=Object.assign(e,t):R(t)===T.String&&(e=Object.assign(e,{message:t})),ke(e,this)}function rs(t){let e={status:500,message:"warning"};return t instanceof Error?this.sendError(t):(R(t)===T.Object?e=Object.assign(e,t):R(t)===T.String&&(e=Object.assign(e,{message:t})),ke(e,this))}function ke(t,e){let r=null;try{r=JSON.stringify(t)}catch{r=JSON.stringify({status:500,message:"JSON\u683C\u5F0F\u8F6C\u6362\u5931\u8D25"})}return new Response(r,{status:t.status||200,headers:e.refHeaders||{"Content-Type":"application/json; charset=UTF-8"}})}var Mt=new w;Mt.get("/",async t=>{let{uuid:e}=t.getValues();return t.sendSuccess({message:"Hello from test!",uuid:e})});var Ht=Mt;var Ft=new w;Ft.get("/",async t=>{let{uuid:e}=t.getValues();return t.sendSuccess({message:"Hello from test!",uuid:e})});var jt=Ft;var{APP_DATABASE:ra}=z,We=class{constructor(){this._isopen=!1}init(e){this.env=e,this.DB=e.DB,this.__packSwitch=!0}setPackSwitch(e){this.__packSwitch=e}connection(){try{return this.__isopen=!0,!0}catch(e){throw new Error(`\u6570\u636E\u5E93\u8FDE\u63A5\u5F02\u5E38\uFF1A${e.message}`)}}open(){return this._isopen!==!0?this.connection():!1}close(){try{this._isopen=!1}catch{}}isOpen(){return this._isopen}query(e,r,s=!0){return s&&(e=this.packagingQueryBefore(e)),new Promise((n,a)=>{this.DB.prepare(e).bind(...r).run().then(o=>{n(o.results)}).catch(o=>{a(new Error("\u6570\u636E\u5E93\u6267\u884C\u9519\u8BEF\uFF0C\u8BF7\u68C0\u67E5\u63D0\u4EA4\u53C2\u6570"))})})}exec(e){return new Promise((r,s)=>{try{let n=this.DB.exec(e);r(n)}catch{s(new Error("\u6570\u636E\u5E93\u6267\u884C\u9519\u8BEF\uFF0C\u8BF7\u68C0\u67E5\u63D0\u4EA4\u53C2\u6570"))}})}packagingQueryBefore(e){if(!this.__packSwitch)return e;let r=e.replace(/^\s+/g,"");return/^SELECT\b(?!\s+COUNT\b)/i.test(r)&&(e=`
+// node_modules/hono/dist/compose.js
+var compose = (middleware, onError, onNotFound) => {
+  return (context, next) => {
+    let index = -1;
+    return dispatch(0);
+    async function dispatch(i) {
+      if (i <= index) {
+        throw new Error("next() called multiple times");
+      }
+      index = i;
+      let res;
+      let isError = false;
+      let handler;
+      if (middleware[i]) {
+        handler = middleware[i][0][0];
+        context.req.routeIndex = i;
+      } else {
+        handler = i === middleware.length && next || void 0;
+      }
+      if (handler) {
+        try {
+          res = await handler(context, () => dispatch(i + 1));
+        } catch (err) {
+          if (err instanceof Error && onError) {
+            context.error = err;
+            res = await onError(err, context);
+            isError = true;
+          } else {
+            throw err;
+          }
+        }
+      } else {
+        if (context.finalized === false && onNotFound) {
+          res = await onNotFound(context);
+        }
+      }
+      if (res && (context.finalized === false || isError)) {
+        context.res = res;
+      }
+      return context;
+    }
+  };
+};
+
+// node_modules/hono/dist/request/constants.js
+var GET_MATCH_RESULT = /* @__PURE__ */ Symbol();
+
+// node_modules/hono/dist/utils/body.js
+var parseBody = async (request, options = /* @__PURE__ */ Object.create(null)) => {
+  const { all = false, dot = false } = options;
+  const headers = request instanceof HonoRequest ? request.raw.headers : request.headers;
+  const contentType = headers.get("Content-Type");
+  if (contentType?.startsWith("multipart/form-data") || contentType?.startsWith("application/x-www-form-urlencoded")) {
+    return parseFormData(request, { all, dot });
+  }
+  return {};
+};
+async function parseFormData(request, options) {
+  const formData = await request.formData();
+  if (formData) {
+    return convertFormDataToBodyData(formData, options);
+  }
+  return {};
+}
+function convertFormDataToBodyData(formData, options) {
+  const form = /* @__PURE__ */ Object.create(null);
+  formData.forEach((value, key) => {
+    const shouldParseAllValues = options.all || key.endsWith("[]");
+    if (!shouldParseAllValues) {
+      form[key] = value;
+    } else {
+      handleParsingAllValues(form, key, value);
+    }
+  });
+  if (options.dot) {
+    Object.entries(form).forEach(([key, value]) => {
+      const shouldParseDotValues = key.includes(".");
+      if (shouldParseDotValues) {
+        handleParsingNestedValues(form, key, value);
+        delete form[key];
+      }
+    });
+  }
+  return form;
+}
+var handleParsingAllValues = (form, key, value) => {
+  if (form[key] !== void 0) {
+    if (Array.isArray(form[key])) {
+      ;
+      form[key].push(value);
+    } else {
+      form[key] = [form[key], value];
+    }
+  } else {
+    if (!key.endsWith("[]")) {
+      form[key] = value;
+    } else {
+      form[key] = [value];
+    }
+  }
+};
+var handleParsingNestedValues = (form, key, value) => {
+  if (/(?:^|\.)__proto__\./.test(key)) {
+    return;
+  }
+  let nestedForm = form;
+  const keys = key.split(".");
+  keys.forEach((key2, index) => {
+    if (index === keys.length - 1) {
+      nestedForm[key2] = value;
+    } else {
+      if (!nestedForm[key2] || typeof nestedForm[key2] !== "object" || Array.isArray(nestedForm[key2]) || nestedForm[key2] instanceof File) {
+        nestedForm[key2] = /* @__PURE__ */ Object.create(null);
+      }
+      nestedForm = nestedForm[key2];
+    }
+  });
+};
+
+// node_modules/hono/dist/utils/url.js
+var splitPath = (path) => {
+  const paths = path.split("/");
+  if (paths[0] === "") {
+    paths.shift();
+  }
+  return paths;
+};
+var splitRoutingPath = (routePath) => {
+  const { groups, path } = extractGroupsFromPath(routePath);
+  const paths = splitPath(path);
+  return replaceGroupMarks(paths, groups);
+};
+var extractGroupsFromPath = (path) => {
+  const groups = [];
+  path = path.replace(/\{[^}]+\}/g, (match2, index) => {
+    const mark = `@${index}`;
+    groups.push([mark, match2]);
+    return mark;
+  });
+  return { groups, path };
+};
+var replaceGroupMarks = (paths, groups) => {
+  for (let i = groups.length - 1; i >= 0; i--) {
+    const [mark] = groups[i];
+    for (let j = paths.length - 1; j >= 0; j--) {
+      if (paths[j].includes(mark)) {
+        paths[j] = paths[j].replace(mark, groups[i][1]);
+        break;
+      }
+    }
+  }
+  return paths;
+};
+var patternCache = {};
+var getPattern = (label, next) => {
+  if (label === "*") {
+    return "*";
+  }
+  const match2 = label.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);
+  if (match2) {
+    const cacheKey = `${label}#${next}`;
+    if (!patternCache[cacheKey]) {
+      if (match2[2]) {
+        patternCache[cacheKey] = next && next[0] !== ":" && next[0] !== "*" ? [cacheKey, match2[1], new RegExp(`^${match2[2]}(?=/${next})`)] : [label, match2[1], new RegExp(`^${match2[2]}$`)];
+      } else {
+        patternCache[cacheKey] = [label, match2[1], true];
+      }
+    }
+    return patternCache[cacheKey];
+  }
+  return null;
+};
+var tryDecode = (str, decoder) => {
+  try {
+    return decoder(str);
+  } catch {
+    return str.replace(/(?:%[0-9A-Fa-f]{2})+/g, (match2) => {
+      try {
+        return decoder(match2);
+      } catch {
+        return match2;
+      }
+    });
+  }
+};
+var tryDecodeURI = (str) => tryDecode(str, decodeURI);
+var getPath = (request) => {
+  const url = request.url;
+  const start = url.indexOf("/", url.indexOf(":") + 4);
+  let i = start;
+  for (; i < url.length; i++) {
+    const charCode = url.charCodeAt(i);
+    if (charCode === 37) {
+      const queryIndex = url.indexOf("?", i);
+      const hashIndex = url.indexOf("#", i);
+      const end = queryIndex === -1 ? hashIndex === -1 ? void 0 : hashIndex : hashIndex === -1 ? queryIndex : Math.min(queryIndex, hashIndex);
+      const path = url.slice(start, end);
+      return tryDecodeURI(path.includes("%25") ? path.replace(/%25/g, "%2525") : path);
+    } else if (charCode === 63 || charCode === 35) {
+      break;
+    }
+  }
+  return url.slice(start, i);
+};
+var getPathNoStrict = (request) => {
+  const result = getPath(request);
+  return result.length > 1 && result.at(-1) === "/" ? result.slice(0, -1) : result;
+};
+var mergePath = (base, sub, ...rest) => {
+  if (rest.length) {
+    sub = mergePath(sub, ...rest);
+  }
+  return `${base?.[0] === "/" ? "" : "/"}${base}${sub === "/" ? "" : `${base?.at(-1) === "/" ? "" : "/"}${sub?.[0] === "/" ? sub.slice(1) : sub}`}`;
+};
+var checkOptionalParameter = (path) => {
+  if (path.charCodeAt(path.length - 1) !== 63 || !path.includes(":")) {
+    return null;
+  }
+  const segments = path.split("/");
+  const results = [];
+  let basePath = "";
+  segments.forEach((segment) => {
+    if (segment !== "" && !/\:/.test(segment)) {
+      basePath += "/" + segment;
+    } else if (/\:/.test(segment)) {
+      if (/\?/.test(segment)) {
+        if (results.length === 0 && basePath === "") {
+          results.push("/");
+        } else {
+          results.push(basePath);
+        }
+        const optionalSegment = segment.replace("?", "");
+        basePath += "/" + optionalSegment;
+        results.push(basePath);
+      } else {
+        basePath += "/" + segment;
+      }
+    }
+  });
+  return results.filter((v, i, a) => a.indexOf(v) === i);
+};
+var _decodeURI = (value) => {
+  if (!/[%+]/.test(value)) {
+    return value;
+  }
+  if (value.indexOf("+") !== -1) {
+    value = value.replace(/\+/g, " ");
+  }
+  return value.indexOf("%") !== -1 ? tryDecode(value, decodeURIComponent_) : value;
+};
+var _getQueryParam = (url, key, multiple) => {
+  let encoded;
+  if (!multiple && key && !/[%+]/.test(key)) {
+    let keyIndex2 = url.indexOf("?", 8);
+    if (keyIndex2 === -1) {
+      return void 0;
+    }
+    if (!url.startsWith(key, keyIndex2 + 1)) {
+      keyIndex2 = url.indexOf(`&${key}`, keyIndex2 + 1);
+    }
+    while (keyIndex2 !== -1) {
+      const trailingKeyCode = url.charCodeAt(keyIndex2 + key.length + 1);
+      if (trailingKeyCode === 61) {
+        const valueIndex = keyIndex2 + key.length + 2;
+        const endIndex = url.indexOf("&", valueIndex);
+        return _decodeURI(url.slice(valueIndex, endIndex === -1 ? void 0 : endIndex));
+      } else if (trailingKeyCode == 38 || isNaN(trailingKeyCode)) {
+        return "";
+      }
+      keyIndex2 = url.indexOf(`&${key}`, keyIndex2 + 1);
+    }
+    encoded = /[%+]/.test(url);
+    if (!encoded) {
+      return void 0;
+    }
+  }
+  const results = {};
+  encoded ??= /[%+]/.test(url);
+  let keyIndex = url.indexOf("?", 8);
+  while (keyIndex !== -1) {
+    const nextKeyIndex = url.indexOf("&", keyIndex + 1);
+    let valueIndex = url.indexOf("=", keyIndex);
+    if (valueIndex > nextKeyIndex && nextKeyIndex !== -1) {
+      valueIndex = -1;
+    }
+    let name = url.slice(
+      keyIndex + 1,
+      valueIndex === -1 ? nextKeyIndex === -1 ? void 0 : nextKeyIndex : valueIndex
+    );
+    if (encoded) {
+      name = _decodeURI(name);
+    }
+    keyIndex = nextKeyIndex;
+    if (name === "") {
+      continue;
+    }
+    let value;
+    if (valueIndex === -1) {
+      value = "";
+    } else {
+      value = url.slice(valueIndex + 1, nextKeyIndex === -1 ? void 0 : nextKeyIndex);
+      if (encoded) {
+        value = _decodeURI(value);
+      }
+    }
+    if (multiple) {
+      if (!(results[name] && Array.isArray(results[name]))) {
+        results[name] = [];
+      }
+      ;
+      results[name].push(value);
+    } else {
+      results[name] ??= value;
+    }
+  }
+  return key ? results[key] : results;
+};
+var getQueryParam = _getQueryParam;
+var getQueryParams = (url, key) => {
+  return _getQueryParam(url, key, true);
+};
+var decodeURIComponent_ = decodeURIComponent;
+
+// node_modules/hono/dist/request.js
+var tryDecodeURIComponent = (str) => tryDecode(str, decodeURIComponent_);
+var HonoRequest = class {
+  /**
+   * `.raw` can get the raw Request object.
+   *
+   * @see {@link https://hono.dev/docs/api/request#raw}
+   *
+   * @example
+   * ```ts
+   * // For Cloudflare Workers
+   * app.post('/', async (c) => {
+   *   const metadata = c.req.raw.cf?.hostMetadata?
+   *   ...
+   * })
+   * ```
+   */
+  raw;
+  #validatedData;
+  // Short name of validatedData
+  #matchResult;
+  routeIndex = 0;
+  /**
+   * `.path` can get the pathname of the request.
+   *
+   * @see {@link https://hono.dev/docs/api/request#path}
+   *
+   * @example
+   * ```ts
+   * app.get('/about/me', (c) => {
+   *   const pathname = c.req.path // `/about/me`
+   * })
+   * ```
+   */
+  path;
+  bodyCache = {};
+  constructor(request, path = "/", matchResult = [[]]) {
+    this.raw = request;
+    this.path = path;
+    this.#matchResult = matchResult;
+    this.#validatedData = {};
+  }
+  param(key) {
+    return key ? this.#getDecodedParam(key) : this.#getAllDecodedParams();
+  }
+  #getDecodedParam(key) {
+    const paramKey = this.#matchResult[0][this.routeIndex][1][key];
+    const param = this.#getParamValue(paramKey);
+    return param && /\%/.test(param) ? tryDecodeURIComponent(param) : param;
+  }
+  #getAllDecodedParams() {
+    const decoded = {};
+    const keys = Object.keys(this.#matchResult[0][this.routeIndex][1]);
+    for (const key of keys) {
+      const value = this.#getParamValue(this.#matchResult[0][this.routeIndex][1][key]);
+      if (value !== void 0) {
+        decoded[key] = /\%/.test(value) ? tryDecodeURIComponent(value) : value;
+      }
+    }
+    return decoded;
+  }
+  #getParamValue(paramKey) {
+    return this.#matchResult[1] ? this.#matchResult[1][paramKey] : paramKey;
+  }
+  query(key) {
+    return getQueryParam(this.url, key);
+  }
+  queries(key) {
+    return getQueryParams(this.url, key);
+  }
+  header(name) {
+    if (name) {
+      return this.raw.headers.get(name) ?? void 0;
+    }
+    const headerData = {};
+    this.raw.headers.forEach((value, key) => {
+      headerData[key] = value;
+    });
+    return headerData;
+  }
+  async parseBody(options) {
+    return parseBody(this, options);
+  }
+  #cachedBody = (key) => {
+    const { bodyCache, raw: raw2 } = this;
+    const cachedBody = bodyCache[key];
+    if (cachedBody) {
+      return cachedBody;
+    }
+    const anyCachedKey = Object.keys(bodyCache)[0];
+    if (anyCachedKey) {
+      return bodyCache[anyCachedKey].then((body) => {
+        if (anyCachedKey === "json") {
+          body = JSON.stringify(body);
+        }
+        return new Response(body)[key]();
+      });
+    }
+    return bodyCache[key] = raw2[key]();
+  };
+  /**
+   * `.json()` can parse Request body of type `application/json`
+   *
+   * @see {@link https://hono.dev/docs/api/request#json}
+   *
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.json()
+   * })
+   * ```
+   */
+  json() {
+    return this.#cachedBody("text").then((text) => JSON.parse(text));
+  }
+  /**
+   * `.text()` can parse Request body of type `text/plain`
+   *
+   * @see {@link https://hono.dev/docs/api/request#text}
+   *
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.text()
+   * })
+   * ```
+   */
+  text() {
+    return this.#cachedBody("text");
+  }
+  /**
+   * `.arrayBuffer()` parse Request body as an `ArrayBuffer`
+   *
+   * @see {@link https://hono.dev/docs/api/request#arraybuffer}
+   *
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.arrayBuffer()
+   * })
+   * ```
+   */
+  arrayBuffer() {
+    return this.#cachedBody("arrayBuffer");
+  }
+  /**
+   * `.bytes()` parses the request body as a `Uint8Array`.
+   *
+   * @see {@link https://hono.dev/docs/api/request#bytes}
+   *
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.bytes()
+   * })
+   * ```
+   */
+  bytes() {
+    return this.#cachedBody("arrayBuffer").then((buffer) => new Uint8Array(buffer));
+  }
+  /**
+   * Parses the request body as a `Blob`.
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.blob();
+   * });
+   * ```
+   * @see https://hono.dev/docs/api/request#blob
+   */
+  blob() {
+    return this.#cachedBody("blob");
+  }
+  /**
+   * Parses the request body as `FormData`.
+   * @example
+   * ```ts
+   * app.post('/entry', async (c) => {
+   *   const body = await c.req.formData();
+   * });
+   * ```
+   * @see https://hono.dev/docs/api/request#formdata
+   */
+  formData() {
+    return this.#cachedBody("formData");
+  }
+  /**
+   * Adds validated data to the request.
+   *
+   * @param target - The target of the validation.
+   * @param data - The validated data to add.
+   */
+  addValidatedData(target, data) {
+    this.#validatedData[target] = data;
+  }
+  valid(target) {
+    return this.#validatedData[target];
+  }
+  /**
+   * `.url()` can get the request url strings.
+   *
+   * @see {@link https://hono.dev/docs/api/request#url}
+   *
+   * @example
+   * ```ts
+   * app.get('/about/me', (c) => {
+   *   const url = c.req.url // `http://localhost:8787/about/me`
+   *   ...
+   * })
+   * ```
+   */
+  get url() {
+    return this.raw.url;
+  }
+  /**
+   * `.method()` can get the method name of the request.
+   *
+   * @see {@link https://hono.dev/docs/api/request#method}
+   *
+   * @example
+   * ```ts
+   * app.get('/about/me', (c) => {
+   *   const method = c.req.method // `GET`
+   * })
+   * ```
+   */
+  get method() {
+    return this.raw.method;
+  }
+  get [GET_MATCH_RESULT]() {
+    return this.#matchResult;
+  }
+  /**
+   * `.matchedRoutes()` can return a matched route in the handler
+   *
+   * @deprecated
+   *
+   * Use matchedRoutes helper defined in "hono/route" instead.
+   *
+   * @see {@link https://hono.dev/docs/api/request#matchedroutes}
+   *
+   * @example
+   * ```ts
+   * app.use('*', async function logger(c, next) {
+   *   await next()
+   *   c.req.matchedRoutes.forEach(({ handler, method, path }, i) => {
+   *     const name = handler.name || (handler.length < 2 ? '[handler]' : '[middleware]')
+   *     console.log(
+   *       method,
+   *       ' ',
+   *       path,
+   *       ' '.repeat(Math.max(10 - path.length, 0)),
+   *       name,
+   *       i === c.req.routeIndex ? '<- respond from here' : ''
+   *     )
+   *   })
+   * })
+   * ```
+   */
+  get matchedRoutes() {
+    return this.#matchResult[0].map(([[, route]]) => route);
+  }
+  /**
+   * `routePath()` can retrieve the path registered within the handler
+   *
+   * @deprecated
+   *
+   * Use routePath helper defined in "hono/route" instead.
+   *
+   * @see {@link https://hono.dev/docs/api/request#routepath}
+   *
+   * @example
+   * ```ts
+   * app.get('/posts/:id', (c) => {
+   *   return c.json({ path: c.req.routePath })
+   * })
+   * ```
+   */
+  get routePath() {
+    return this.#matchResult[0].map(([[, route]]) => route)[this.routeIndex].path;
+  }
+};
+
+// node_modules/hono/dist/utils/html.js
+var HtmlEscapedCallbackPhase = {
+  Stringify: 1,
+  BeforeStream: 2,
+  Stream: 3
+};
+var raw = (value, callbacks) => {
+  const escapedString = new String(value);
+  escapedString.isEscaped = true;
+  escapedString.callbacks = callbacks;
+  return escapedString;
+};
+var resolveCallback = async (str, phase, preserveCallbacks, context, buffer) => {
+  if (typeof str === "object" && !(str instanceof String)) {
+    if (!(str instanceof Promise)) {
+      str = str.toString();
+    }
+    if (str instanceof Promise) {
+      str = await str;
+    }
+  }
+  const callbacks = str.callbacks;
+  if (!callbacks?.length) {
+    return Promise.resolve(str);
+  }
+  if (buffer) {
+    buffer[0] += str;
+  } else {
+    buffer = [str];
+  }
+  const resStr = Promise.all(callbacks.map((c) => c({ phase, buffer, context }))).then(
+    (res) => Promise.all(
+      res.filter(Boolean).map((str2) => resolveCallback(str2, phase, false, context, buffer))
+    ).then(() => buffer[0])
+  );
+  if (preserveCallbacks) {
+    return raw(await resStr, callbacks);
+  } else {
+    return resStr;
+  }
+};
+
+// node_modules/hono/dist/context.js
+var TEXT_PLAIN = "text/plain; charset=UTF-8";
+var setDefaultContentType = (contentType, headers) => {
+  return {
+    "Content-Type": contentType,
+    ...headers
+  };
+};
+var createResponseInstance = (body, init) => new Response(body, init);
+var Context = class {
+  #rawRequest;
+  #req;
+  /**
+   * `.env` can get bindings (environment variables, secrets, KV namespaces, D1 database, R2 bucket etc.) in Cloudflare Workers.
+   *
+   * @see {@link https://hono.dev/docs/api/context#env}
+   *
+   * @example
+   * ```ts
+   * // Environment object for Cloudflare Workers
+   * app.get('*', async c => {
+   *   const counter = c.env.COUNTER
+   * })
+   * ```
+   */
+  env = {};
+  #var;
+  finalized = false;
+  /**
+   * `.error` can get the error object from the middleware if the Handler throws an error.
+   *
+   * @see {@link https://hono.dev/docs/api/context#error}
+   *
+   * @example
+   * ```ts
+   * app.use('*', async (c, next) => {
+   *   await next()
+   *   if (c.error) {
+   *     // do something...
+   *   }
+   * })
+   * ```
+   */
+  error;
+  #status;
+  #executionCtx;
+  #res;
+  #layout;
+  #renderer;
+  #notFoundHandler;
+  #preparedHeaders;
+  #matchResult;
+  #path;
+  /**
+   * Creates an instance of the Context class.
+   *
+   * @param req - The Request object.
+   * @param options - Optional configuration options for the context.
+   */
+  constructor(req, options) {
+    this.#rawRequest = req;
+    if (options) {
+      this.#executionCtx = options.executionCtx;
+      this.env = options.env;
+      this.#notFoundHandler = options.notFoundHandler;
+      this.#path = options.path;
+      this.#matchResult = options.matchResult;
+    }
+  }
+  /**
+   * `.req` is the instance of {@link HonoRequest}.
+   */
+  get req() {
+    this.#req ??= new HonoRequest(this.#rawRequest, this.#path, this.#matchResult);
+    return this.#req;
+  }
+  /**
+   * @see {@link https://hono.dev/docs/api/context#event}
+   * The FetchEvent associated with the current request.
+   *
+   * @throws Will throw an error if the context does not have a FetchEvent.
+   */
+  get event() {
+    if (this.#executionCtx && "respondWith" in this.#executionCtx) {
+      return this.#executionCtx;
+    } else {
+      throw Error("This context has no FetchEvent");
+    }
+  }
+  /**
+   * @see {@link https://hono.dev/docs/api/context#executionctx}
+   * The ExecutionContext associated with the current request.
+   *
+   * @throws Will throw an error if the context does not have an ExecutionContext.
+   */
+  get executionCtx() {
+    if (this.#executionCtx) {
+      return this.#executionCtx;
+    } else {
+      throw Error("This context has no ExecutionContext");
+    }
+  }
+  /**
+   * @see {@link https://hono.dev/docs/api/context#res}
+   * The Response object for the current request.
+   */
+  get res() {
+    return this.#res ||= createResponseInstance(null, {
+      headers: this.#preparedHeaders ??= new Headers()
+    });
+  }
+  /**
+   * Sets the Response object for the current request.
+   *
+   * @param _res - The Response object to set.
+   */
+  set res(_res) {
+    if (this.#res && _res) {
+      _res = createResponseInstance(_res.body, _res);
+      for (const [k, v] of this.#res.headers.entries()) {
+        if (k === "content-type") {
+          continue;
+        }
+        if (k === "set-cookie") {
+          const cookies = this.#res.headers.getSetCookie();
+          _res.headers.delete("set-cookie");
+          for (const cookie of cookies) {
+            _res.headers.append("set-cookie", cookie);
+          }
+        } else {
+          _res.headers.set(k, v);
+        }
+      }
+    }
+    this.#res = _res;
+    this.finalized = true;
+  }
+  /**
+   * `.render()` can create a response within a layout.
+   *
+   * @see {@link https://hono.dev/docs/api/context#render-setrenderer}
+   *
+   * @example
+   * ```ts
+   * app.get('/', (c) => {
+   *   return c.render('Hello!')
+   * })
+   * ```
+   */
+  render = (...args) => {
+    this.#renderer ??= (content) => this.html(content);
+    return this.#renderer(...args);
+  };
+  /**
+   * Sets the layout for the response.
+   *
+   * @param layout - The layout to set.
+   * @returns The layout function.
+   */
+  setLayout = (layout) => this.#layout = layout;
+  /**
+   * Gets the current layout for the response.
+   *
+   * @returns The current layout function.
+   */
+  getLayout = () => this.#layout;
+  /**
+   * `.setRenderer()` can set the layout in the custom middleware.
+   *
+   * @see {@link https://hono.dev/docs/api/context#render-setrenderer}
+   *
+   * @example
+   * ```tsx
+   * app.use('*', async (c, next) => {
+   *   c.setRenderer((content) => {
+   *     return c.html(
+   *       <html>
+   *         <body>
+   *           <p>{content}</p>
+   *         </body>
+   *       </html>
+   *     )
+   *   })
+   *   await next()
+   * })
+   * ```
+   */
+  setRenderer = (renderer) => {
+    this.#renderer = renderer;
+  };
+  /**
+   * `.header()` can set headers.
+   *
+   * @see {@link https://hono.dev/docs/api/context#header}
+   *
+   * @example
+   * ```ts
+   * app.get('/welcome', (c) => {
+   *   // Set headers
+   *   c.header('X-Message', 'Hello!')
+   *   c.header('Content-Type', 'text/plain')
+   *
+   *   return c.body('Thank you for coming')
+   * })
+   * ```
+   */
+  header = (name, value, options) => {
+    if (this.finalized) {
+      this.#res = createResponseInstance(this.#res.body, this.#res);
+    }
+    const headers = this.#res ? this.#res.headers : this.#preparedHeaders ??= new Headers();
+    if (value === void 0) {
+      headers.delete(name);
+    } else if (options?.append) {
+      headers.append(name, value);
+    } else {
+      headers.set(name, value);
+    }
+  };
+  status = (status) => {
+    this.#status = status;
+  };
+  /**
+   * `.set()` can set the value specified by the key.
+   *
+   * @see {@link https://hono.dev/docs/api/context#set-get}
+   *
+   * @example
+   * ```ts
+   * app.use('*', async (c, next) => {
+   *   c.set('message', 'Hono is hot!!')
+   *   await next()
+   * })
+   * ```
+   */
+  set = (key, value) => {
+    this.#var ??= /* @__PURE__ */ new Map();
+    this.#var.set(key, value);
+  };
+  /**
+   * `.get()` can use the value specified by the key.
+   *
+   * @see {@link https://hono.dev/docs/api/context#set-get}
+   *
+   * @example
+   * ```ts
+   * app.get('/', (c) => {
+   *   const message = c.get('message')
+   *   return c.text(`The message is "${message}"`)
+   * })
+   * ```
+   */
+  get = (key) => {
+    return this.#var ? this.#var.get(key) : void 0;
+  };
+  /**
+   * `.var` can access the value of a variable.
+   *
+   * @see {@link https://hono.dev/docs/api/context#var}
+   *
+   * @example
+   * ```ts
+   * const result = c.var.client.oneMethod()
+   * ```
+   */
+  // c.var.propName is a read-only
+  get var() {
+    if (!this.#var) {
+      return {};
+    }
+    return Object.fromEntries(this.#var);
+  }
+  #newResponse(data, arg, headers) {
+    const responseHeaders = this.#res ? new Headers(this.#res.headers) : this.#preparedHeaders ?? new Headers();
+    if (typeof arg === "object" && "headers" in arg) {
+      const argHeaders = arg.headers instanceof Headers ? arg.headers : new Headers(arg.headers);
+      for (const [key, value] of argHeaders) {
+        if (key.toLowerCase() === "set-cookie") {
+          responseHeaders.append(key, value);
+        } else {
+          responseHeaders.set(key, value);
+        }
+      }
+    }
+    if (headers) {
+      for (const [k, v] of Object.entries(headers)) {
+        if (typeof v === "string") {
+          responseHeaders.set(k, v);
+        } else {
+          responseHeaders.delete(k);
+          for (const v2 of v) {
+            responseHeaders.append(k, v2);
+          }
+        }
+      }
+    }
+    const status = typeof arg === "number" ? arg : arg?.status ?? this.#status;
+    return createResponseInstance(data, { status, headers: responseHeaders });
+  }
+  newResponse = (...args) => this.#newResponse(...args);
+  /**
+   * `.body()` can return the HTTP response.
+   * You can set headers with `.header()` and set HTTP status code with `.status`.
+   * This can also be set in `.text()`, `.json()` and so on.
+   *
+   * @see {@link https://hono.dev/docs/api/context#body}
+   *
+   * @example
+   * ```ts
+   * app.get('/welcome', (c) => {
+   *   // Set headers
+   *   c.header('X-Message', 'Hello!')
+   *   c.header('Content-Type', 'text/plain')
+   *   // Set HTTP status code
+   *   c.status(201)
+   *
+   *   // Return the response body
+   *   return c.body('Thank you for coming')
+   * })
+   * ```
+   */
+  body = (data, arg, headers) => this.#newResponse(data, arg, headers);
+  /**
+   * `.text()` can render text as `Content-Type:text/plain`.
+   *
+   * @see {@link https://hono.dev/docs/api/context#text}
+   *
+   * @example
+   * ```ts
+   * app.get('/say', (c) => {
+   *   return c.text('Hello!')
+   * })
+   * ```
+   */
+  text = (text, arg, headers) => {
+    return !this.#preparedHeaders && !this.#status && !arg && !headers && !this.finalized ? new Response(text) : this.#newResponse(
+      text,
+      arg,
+      setDefaultContentType(TEXT_PLAIN, headers)
+    );
+  };
+  /**
+   * `.json()` can render JSON as `Content-Type:application/json`.
+   *
+   * @see {@link https://hono.dev/docs/api/context#json}
+   *
+   * @example
+   * ```ts
+   * app.get('/api', (c) => {
+   *   return c.json({ message: 'Hello!' })
+   * })
+   * ```
+   */
+  json = (object, arg, headers) => {
+    return this.#newResponse(
+      JSON.stringify(object),
+      arg,
+      setDefaultContentType("application/json", headers)
+    );
+  };
+  html = (html, arg, headers) => {
+    const res = (html2) => this.#newResponse(html2, arg, setDefaultContentType("text/html; charset=UTF-8", headers));
+    return typeof html === "object" ? resolveCallback(html, HtmlEscapedCallbackPhase.Stringify, false, {}).then(res) : res(html);
+  };
+  /**
+   * `.redirect()` can Redirect, default status code is 302.
+   *
+   * @see {@link https://hono.dev/docs/api/context#redirect}
+   *
+   * @example
+   * ```ts
+   * app.get('/redirect', (c) => {
+   *   return c.redirect('/')
+   * })
+   * app.get('/redirect-permanently', (c) => {
+   *   return c.redirect('/', 301)
+   * })
+   * ```
+   */
+  redirect = (location, status) => {
+    const locationString = String(location);
+    this.header(
+      "Location",
+      // Multibyes should be encoded
+      // eslint-disable-next-line no-control-regex
+      !/[^\x00-\xFF]/.test(locationString) ? locationString : encodeURI(locationString)
+    );
+    return this.newResponse(null, status ?? 302);
+  };
+  /**
+   * `.notFound()` can return the Not Found Response.
+   *
+   * @see {@link https://hono.dev/docs/api/context#notfound}
+   *
+   * @example
+   * ```ts
+   * app.get('/notfound', (c) => {
+   *   return c.notFound()
+   * })
+   * ```
+   */
+  notFound = () => {
+    this.#notFoundHandler ??= () => createResponseInstance();
+    return this.#notFoundHandler(this);
+  };
+};
+
+// node_modules/hono/dist/router.js
+var METHOD_NAME_ALL = "ALL";
+var METHOD_NAME_ALL_LOWERCASE = "all";
+var METHODS = ["get", "post", "put", "delete", "options", "patch"];
+var MESSAGE_MATCHER_IS_ALREADY_BUILT = "Can not add a route since the matcher is already built.";
+var UnsupportedPathError = class extends Error {
+};
+
+// node_modules/hono/dist/utils/constants.js
+var COMPOSED_HANDLER = "__COMPOSED_HANDLER";
+
+// node_modules/hono/dist/hono-base.js
+var notFoundHandler = (c) => {
+  return c.text("404 Not Found", 404);
+};
+var errorHandler = (err, c) => {
+  if ("getResponse" in err) {
+    const res = err.getResponse();
+    return c.newResponse(res.body, res);
+  }
+  console.error(err);
+  return c.text("Internal Server Error", 500);
+};
+var Hono = class _Hono {
+  get;
+  post;
+  put;
+  delete;
+  options;
+  patch;
+  all;
+  on;
+  use;
+  /*
+    This class is like an abstract class and does not have a router.
+    To use it, inherit the class and implement router in the constructor.
+  */
+  router;
+  getPath;
+  // Cannot use `#` because it requires visibility at JavaScript runtime.
+  _basePath = "/";
+  #path = "/";
+  routes = [];
+  constructor(options = {}) {
+    const allMethods = [...METHODS, METHOD_NAME_ALL_LOWERCASE];
+    allMethods.forEach((method) => {
+      this[method] = (args1, ...args) => {
+        if (typeof args1 === "string") {
+          this.#path = args1;
+        } else {
+          this.#addRoute(method, this.#path, args1);
+        }
+        args.forEach((handler) => {
+          this.#addRoute(method, this.#path, handler);
+        });
+        return this;
+      };
+    });
+    this.on = (method, path, ...handlers) => {
+      for (const p of [path].flat()) {
+        this.#path = p;
+        for (const m of [method].flat()) {
+          handlers.map((handler) => {
+            this.#addRoute(m.toUpperCase(), this.#path, handler);
+          });
+        }
+      }
+      return this;
+    };
+    this.use = (arg1, ...handlers) => {
+      if (typeof arg1 === "string") {
+        this.#path = arg1;
+      } else {
+        this.#path = "*";
+        handlers.unshift(arg1);
+      }
+      handlers.forEach((handler) => {
+        this.#addRoute(METHOD_NAME_ALL, this.#path, handler);
+      });
+      return this;
+    };
+    const { strict, ...optionsWithoutStrict } = options;
+    Object.assign(this, optionsWithoutStrict);
+    this.getPath = strict ?? true ? options.getPath ?? getPath : getPathNoStrict;
+  }
+  #clone() {
+    const clone = new _Hono({
+      router: this.router,
+      getPath: this.getPath
+    });
+    clone.errorHandler = this.errorHandler;
+    clone.#notFoundHandler = this.#notFoundHandler;
+    clone.routes = this.routes;
+    return clone;
+  }
+  #notFoundHandler = notFoundHandler;
+  // Cannot use `#` because it requires visibility at JavaScript runtime.
+  errorHandler = errorHandler;
+  /**
+   * `.route()` allows grouping other Hono instance in routes.
+   *
+   * @see {@link https://hono.dev/docs/api/routing#grouping}
+   *
+   * @param {string} path - base Path
+   * @param {Hono} app - other Hono instance
+   * @returns {Hono} routed Hono instance
+   *
+   * @example
+   * ```ts
+   * const app = new Hono()
+   * const app2 = new Hono()
+   *
+   * app2.get("/user", (c) => c.text("user"))
+   * app.route("/api", app2) // GET /api/user
+   * ```
+   */
+  route(path, app2) {
+    const subApp = this.basePath(path);
+    app2.routes.map((r) => {
+      let handler;
+      if (app2.errorHandler === errorHandler) {
+        handler = r.handler;
+      } else {
+        handler = async (c, next) => (await compose([], app2.errorHandler)(c, () => r.handler(c, next))).res;
+        handler[COMPOSED_HANDLER] = r.handler;
+      }
+      subApp.#addRoute(r.method, r.path, handler, r.basePath);
+    });
+    return this;
+  }
+  /**
+   * `.basePath()` allows base paths to be specified.
+   *
+   * @see {@link https://hono.dev/docs/api/routing#base-path}
+   *
+   * @param {string} path - base Path
+   * @returns {Hono} changed Hono instance
+   *
+   * @example
+   * ```ts
+   * const api = new Hono().basePath('/api')
+   * ```
+   */
+  basePath(path) {
+    const subApp = this.#clone();
+    subApp._basePath = mergePath(this._basePath, path);
+    return subApp;
+  }
+  /**
+   * `.onError()` handles an error and returns a customized Response.
+   *
+   * @see {@link https://hono.dev/docs/api/hono#error-handling}
+   *
+   * @param {ErrorHandler} handler - request Handler for error
+   * @returns {Hono} changed Hono instance
+   *
+   * @example
+   * ```ts
+   * app.onError((err, c) => {
+   *   console.error(`${err}`)
+   *   return c.text('Custom Error Message', 500)
+   * })
+   * ```
+   */
+  onError = (handler) => {
+    this.errorHandler = handler;
+    return this;
+  };
+  /**
+   * `.notFound()` allows you to customize a Not Found Response.
+   *
+   * @see {@link https://hono.dev/docs/api/hono#not-found}
+   *
+   * @param {NotFoundHandler} handler - request handler for not-found
+   * @returns {Hono} changed Hono instance
+   *
+   * @example
+   * ```ts
+   * app.notFound((c) => {
+   *   return c.text('Custom 404 Message', 404)
+   * })
+   * ```
+   */
+  notFound = (handler) => {
+    this.#notFoundHandler = handler;
+    return this;
+  };
+  /**
+   * `.mount()` allows you to mount applications built with other frameworks into your Hono application.
+   *
+   * @see {@link https://hono.dev/docs/api/hono#mount}
+   *
+   * @param {string} path - base Path
+   * @param {Function} applicationHandler - other Request Handler
+   * @param {MountOptions} [options] - options of `.mount()`
+   * @returns {Hono} mounted Hono instance
+   *
+   * @example
+   * ```ts
+   * import { Router as IttyRouter } from 'itty-router'
+   * import { Hono } from 'hono'
+   * // Create itty-router application
+   * const ittyRouter = IttyRouter()
+   * // GET /itty-router/hello
+   * ittyRouter.get('/hello', () => new Response('Hello from itty-router'))
+   *
+   * const app = new Hono()
+   * app.mount('/itty-router', ittyRouter.handle)
+   * ```
+   *
+   * @example
+   * ```ts
+   * const app = new Hono()
+   * // Send the request to another application without modification.
+   * app.mount('/app', anotherApp, {
+   *   replaceRequest: (req) => req,
+   * })
+   * ```
+   */
+  mount(path, applicationHandler, options) {
+    let replaceRequest;
+    let optionHandler;
+    if (options) {
+      if (typeof options === "function") {
+        optionHandler = options;
+      } else {
+        optionHandler = options.optionHandler;
+        if (options.replaceRequest === false) {
+          replaceRequest = (request) => request;
+        } else {
+          replaceRequest = options.replaceRequest;
+        }
+      }
+    }
+    const getOptions = optionHandler ? (c) => {
+      const options2 = optionHandler(c);
+      return Array.isArray(options2) ? options2 : [options2];
+    } : (c) => {
+      let executionContext = void 0;
+      try {
+        executionContext = c.executionCtx;
+      } catch {
+      }
+      return [c.env, executionContext];
+    };
+    replaceRequest ||= (() => {
+      const mergedPath = mergePath(this._basePath, path);
+      const pathPrefixLength = mergedPath === "/" ? 0 : mergedPath.length;
+      return (request) => {
+        const url = new URL(request.url);
+        url.pathname = this.getPath(request).slice(pathPrefixLength) || "/";
+        return new Request(url, request);
+      };
+    })();
+    const handler = async (c, next) => {
+      const res = await applicationHandler(replaceRequest(c.req.raw), ...getOptions(c));
+      if (res) {
+        return res;
+      }
+      await next();
+    };
+    this.#addRoute(METHOD_NAME_ALL, mergePath(path, "*"), handler);
+    return this;
+  }
+  #addRoute(method, path, handler, baseRoutePath) {
+    method = method.toUpperCase();
+    path = mergePath(this._basePath, path);
+    const r = {
+      basePath: baseRoutePath !== void 0 ? mergePath(this._basePath, baseRoutePath) : this._basePath,
+      path,
+      method,
+      handler
+    };
+    this.router.add(method, path, [handler, r]);
+    this.routes.push(r);
+  }
+  #handleError(err, c) {
+    if (err instanceof Error) {
+      return this.errorHandler(err, c);
+    }
+    throw err;
+  }
+  #dispatch(request, executionCtx, env, method) {
+    if (method === "HEAD") {
+      return (async () => new Response(null, await this.#dispatch(request, executionCtx, env, "GET")))();
+    }
+    const path = this.getPath(request, { env });
+    const matchResult = this.router.match(method, path);
+    const c = new Context(request, {
+      path,
+      matchResult,
+      env,
+      executionCtx,
+      notFoundHandler: this.#notFoundHandler
+    });
+    if (matchResult[0].length === 1) {
+      let res;
+      try {
+        res = matchResult[0][0][0][0](c, async () => {
+          c.res = await this.#notFoundHandler(c);
+        });
+      } catch (err) {
+        return this.#handleError(err, c);
+      }
+      return res instanceof Promise ? res.then(
+        (resolved) => resolved || (c.finalized ? c.res : this.#notFoundHandler(c))
+      ).catch((err) => this.#handleError(err, c)) : res ?? this.#notFoundHandler(c);
+    }
+    const composed = compose(matchResult[0], this.errorHandler, this.#notFoundHandler);
+    return (async () => {
+      try {
+        const context = await composed(c);
+        if (!context.finalized) {
+          throw new Error(
+            "Context is not finalized. Did you forget to return a Response object or `await next()`?"
+          );
+        }
+        return context.res;
+      } catch (err) {
+        return this.#handleError(err, c);
+      }
+    })();
+  }
+  /**
+   * `.fetch()` will be entry point of your app.
+   *
+   * @see {@link https://hono.dev/docs/api/hono#fetch}
+   *
+   * @param {Request} request - request Object of request
+   * @param {Env} Env - env Object
+   * @param {ExecutionContext} - context of execution
+   * @returns {Response | Promise<Response>} response of request
+   *
+   */
+  fetch = (request, ...rest) => {
+    return this.#dispatch(request, rest[1], rest[0], request.method);
+  };
+  /**
+   * `.request()` is a useful method for testing.
+   * You can pass a URL or pathname to send a GET request.
+   * app will return a Response object.
+   * ```ts
+   * test('GET /hello is ok', async () => {
+   *   const res = await app.request('/hello')
+   *   expect(res.status).toBe(200)
+   * })
+   * ```
+   * @see https://hono.dev/docs/api/hono#request
+   */
+  request = (input, requestInit, Env, executionCtx) => {
+    if (input instanceof Request) {
+      return this.fetch(requestInit ? new Request(input, requestInit) : input, Env, executionCtx);
+    }
+    input = input.toString();
+    return this.fetch(
+      new Request(
+        /^https?:\/\//.test(input) ? input : `http://localhost${mergePath("/", input)}`,
+        requestInit
+      ),
+      Env,
+      executionCtx
+    );
+  };
+  /**
+   * `.fire()` automatically adds a global fetch event listener.
+   * This can be useful for environments that adhere to the Service Worker API, such as non-ES module Cloudflare Workers.
+   * @deprecated
+   * Use `fire` from `hono/service-worker` instead.
+   * ```ts
+   * import { Hono } from 'hono'
+   * import { fire } from 'hono/service-worker'
+   *
+   * const app = new Hono()
+   * // ...
+   * fire(app)
+   * ```
+   * @see https://hono.dev/docs/api/hono#fire
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
+   * @see https://developers.cloudflare.com/workers/reference/migrate-to-module-workers/
+   */
+  fire = () => {
+    addEventListener("fetch", (event) => {
+      event.respondWith(this.#dispatch(event.request, event, void 0, event.request.method));
+    });
+  };
+};
+
+// node_modules/hono/dist/router/reg-exp-router/matcher.js
+var emptyParam = [];
+function match(method, path) {
+  const matchers = this.buildAllMatchers();
+  const match2 = ((method2, path2) => {
+    const matcher = matchers[method2] || matchers[METHOD_NAME_ALL];
+    const staticMatch = matcher[2][path2];
+    if (staticMatch) {
+      return staticMatch;
+    }
+    const match3 = path2.match(matcher[0]);
+    if (!match3) {
+      return [[], emptyParam];
+    }
+    const index = match3.indexOf("", 1);
+    return [matcher[1][index], match3];
+  });
+  this.match = match2;
+  return match2(method, path);
+}
+
+// node_modules/hono/dist/router/reg-exp-router/node.js
+var LABEL_REG_EXP_STR = "[^/]+";
+var ONLY_WILDCARD_REG_EXP_STR = ".*";
+var TAIL_WILDCARD_REG_EXP_STR = "(?:|/.*)";
+var PATH_ERROR = /* @__PURE__ */ Symbol();
+var regExpMetaChars = new Set(".\\+*[^]$()");
+function compareKey(a, b) {
+  if (a.length === 1) {
+    return b.length === 1 ? a < b ? -1 : 1 : -1;
+  }
+  if (b.length === 1) {
+    return 1;
+  }
+  if (a === ONLY_WILDCARD_REG_EXP_STR || a === TAIL_WILDCARD_REG_EXP_STR) {
+    return 1;
+  } else if (b === ONLY_WILDCARD_REG_EXP_STR || b === TAIL_WILDCARD_REG_EXP_STR) {
+    return -1;
+  }
+  if (a === LABEL_REG_EXP_STR) {
+    return 1;
+  } else if (b === LABEL_REG_EXP_STR) {
+    return -1;
+  }
+  return a.length === b.length ? a < b ? -1 : 1 : b.length - a.length;
+}
+var Node = class _Node {
+  #index;
+  #varIndex;
+  #children = /* @__PURE__ */ Object.create(null);
+  insert(tokens, index, paramMap, context, pathErrorCheckOnly) {
+    if (tokens.length === 0) {
+      if (this.#index !== void 0) {
+        throw PATH_ERROR;
+      }
+      if (pathErrorCheckOnly) {
+        return;
+      }
+      this.#index = index;
+      return;
+    }
+    const [token, ...restTokens] = tokens;
+    const pattern = token === "*" ? restTokens.length === 0 ? ["", "", ONLY_WILDCARD_REG_EXP_STR] : ["", "", LABEL_REG_EXP_STR] : token === "/*" ? ["", "", TAIL_WILDCARD_REG_EXP_STR] : token.match(/^\:([^\{\}]+)(?:\{(.+)\})?$/);
+    let node;
+    if (pattern) {
+      const name = pattern[1];
+      let regexpStr = pattern[2] || LABEL_REG_EXP_STR;
+      if (name && pattern[2]) {
+        if (regexpStr === ".*") {
+          throw PATH_ERROR;
+        }
+        regexpStr = regexpStr.replace(/^\((?!\?:)(?=[^)]+\)$)/, "(?:");
+        if (/\((?!\?:)/.test(regexpStr)) {
+          throw PATH_ERROR;
+        }
+      }
+      node = this.#children[regexpStr];
+      if (!node) {
+        if (Object.keys(this.#children).some(
+          (k) => k !== ONLY_WILDCARD_REG_EXP_STR && k !== TAIL_WILDCARD_REG_EXP_STR
+        )) {
+          throw PATH_ERROR;
+        }
+        if (pathErrorCheckOnly) {
+          return;
+        }
+        node = this.#children[regexpStr] = new _Node();
+        if (name !== "") {
+          node.#varIndex = context.varIndex++;
+        }
+      }
+      if (!pathErrorCheckOnly && name !== "") {
+        paramMap.push([name, node.#varIndex]);
+      }
+    } else {
+      node = this.#children[token];
+      if (!node) {
+        if (Object.keys(this.#children).some(
+          (k) => k.length > 1 && k !== ONLY_WILDCARD_REG_EXP_STR && k !== TAIL_WILDCARD_REG_EXP_STR
+        )) {
+          throw PATH_ERROR;
+        }
+        if (pathErrorCheckOnly) {
+          return;
+        }
+        node = this.#children[token] = new _Node();
+      }
+    }
+    node.insert(restTokens, index, paramMap, context, pathErrorCheckOnly);
+  }
+  buildRegExpStr() {
+    const childKeys = Object.keys(this.#children).sort(compareKey);
+    const strList = childKeys.map((k) => {
+      const c = this.#children[k];
+      return (typeof c.#varIndex === "number" ? `(${k})@${c.#varIndex}` : regExpMetaChars.has(k) ? `\\${k}` : k) + c.buildRegExpStr();
+    });
+    if (typeof this.#index === "number") {
+      strList.unshift(`#${this.#index}`);
+    }
+    if (strList.length === 0) {
+      return "";
+    }
+    if (strList.length === 1) {
+      return strList[0];
+    }
+    return "(?:" + strList.join("|") + ")";
+  }
+};
+
+// node_modules/hono/dist/router/reg-exp-router/trie.js
+var Trie = class {
+  #context = { varIndex: 0 };
+  #root = new Node();
+  insert(path, index, pathErrorCheckOnly) {
+    const paramAssoc = [];
+    const groups = [];
+    for (let i = 0; ; ) {
+      let replaced = false;
+      path = path.replace(/\{[^}]+\}/g, (m) => {
+        const mark = `@\\${i}`;
+        groups[i] = [mark, m];
+        i++;
+        replaced = true;
+        return mark;
+      });
+      if (!replaced) {
+        break;
+      }
+    }
+    const tokens = path.match(/(?::[^\/]+)|(?:\/\*$)|./g) || [];
+    for (let i = groups.length - 1; i >= 0; i--) {
+      const [mark] = groups[i];
+      for (let j = tokens.length - 1; j >= 0; j--) {
+        if (tokens[j].indexOf(mark) !== -1) {
+          tokens[j] = tokens[j].replace(mark, groups[i][1]);
+          break;
+        }
+      }
+    }
+    this.#root.insert(tokens, index, paramAssoc, this.#context, pathErrorCheckOnly);
+    return paramAssoc;
+  }
+  buildRegExp() {
+    let regexp = this.#root.buildRegExpStr();
+    if (regexp === "") {
+      return [/^$/, [], []];
+    }
+    let captureIndex = 0;
+    const indexReplacementMap = [];
+    const paramReplacementMap = [];
+    regexp = regexp.replace(/#(\d+)|@(\d+)|\.\*\$/g, (_, handlerIndex, paramIndex) => {
+      if (handlerIndex !== void 0) {
+        indexReplacementMap[++captureIndex] = Number(handlerIndex);
+        return "$()";
+      }
+      if (paramIndex !== void 0) {
+        paramReplacementMap[Number(paramIndex)] = ++captureIndex;
+        return "";
+      }
+      return "";
+    });
+    return [new RegExp(`^${regexp}`), indexReplacementMap, paramReplacementMap];
+  }
+};
+
+// node_modules/hono/dist/router/reg-exp-router/router.js
+var nullMatcher = [/^$/, [], /* @__PURE__ */ Object.create(null)];
+var wildcardRegExpCache = /* @__PURE__ */ Object.create(null);
+function buildWildcardRegExp(path) {
+  return wildcardRegExpCache[path] ??= new RegExp(
+    path === "*" ? "" : `^${path.replace(
+      /\/\*$|([.\\+*[^\]$()])/g,
+      (_, metaChar) => metaChar ? `\\${metaChar}` : "(?:|/.*)"
+    )}$`
+  );
+}
+function clearWildcardRegExpCache() {
+  wildcardRegExpCache = /* @__PURE__ */ Object.create(null);
+}
+function buildMatcherFromPreprocessedRoutes(routes) {
+  const trie = new Trie();
+  const handlerData = [];
+  if (routes.length === 0) {
+    return nullMatcher;
+  }
+  const routesWithStaticPathFlag = routes.map(
+    (route) => [!/\*|\/:/.test(route[0]), ...route]
+  ).sort(
+    ([isStaticA, pathA], [isStaticB, pathB]) => isStaticA ? 1 : isStaticB ? -1 : pathA.length - pathB.length
+  );
+  const staticMap = /* @__PURE__ */ Object.create(null);
+  for (let i = 0, j = -1, len = routesWithStaticPathFlag.length; i < len; i++) {
+    const [pathErrorCheckOnly, path, handlers] = routesWithStaticPathFlag[i];
+    if (pathErrorCheckOnly) {
+      staticMap[path] = [handlers.map(([h]) => [h, /* @__PURE__ */ Object.create(null)]), emptyParam];
+    } else {
+      j++;
+    }
+    let paramAssoc;
+    try {
+      paramAssoc = trie.insert(path, j, pathErrorCheckOnly);
+    } catch (e) {
+      throw e === PATH_ERROR ? new UnsupportedPathError(path) : e;
+    }
+    if (pathErrorCheckOnly) {
+      continue;
+    }
+    handlerData[j] = handlers.map(([h, paramCount]) => {
+      const paramIndexMap = /* @__PURE__ */ Object.create(null);
+      paramCount -= 1;
+      for (; paramCount >= 0; paramCount--) {
+        const [key, value] = paramAssoc[paramCount];
+        paramIndexMap[key] = value;
+      }
+      return [h, paramIndexMap];
+    });
+  }
+  const [regexp, indexReplacementMap, paramReplacementMap] = trie.buildRegExp();
+  for (let i = 0, len = handlerData.length; i < len; i++) {
+    for (let j = 0, len2 = handlerData[i].length; j < len2; j++) {
+      const map = handlerData[i][j]?.[1];
+      if (!map) {
+        continue;
+      }
+      const keys = Object.keys(map);
+      for (let k = 0, len3 = keys.length; k < len3; k++) {
+        map[keys[k]] = paramReplacementMap[map[keys[k]]];
+      }
+    }
+  }
+  const handlerMap = [];
+  for (const i in indexReplacementMap) {
+    handlerMap[i] = handlerData[indexReplacementMap[i]];
+  }
+  return [regexp, handlerMap, staticMap];
+}
+function findMiddleware(middleware, path) {
+  if (!middleware) {
+    return void 0;
+  }
+  for (const k of Object.keys(middleware).sort((a, b) => b.length - a.length)) {
+    if (buildWildcardRegExp(k).test(path)) {
+      return [...middleware[k]];
+    }
+  }
+  return void 0;
+}
+var RegExpRouter = class {
+  name = "RegExpRouter";
+  #middleware;
+  #routes;
+  constructor() {
+    this.#middleware = { [METHOD_NAME_ALL]: /* @__PURE__ */ Object.create(null) };
+    this.#routes = { [METHOD_NAME_ALL]: /* @__PURE__ */ Object.create(null) };
+  }
+  add(method, path, handler) {
+    const middleware = this.#middleware;
+    const routes = this.#routes;
+    if (!middleware || !routes) {
+      throw new Error(MESSAGE_MATCHER_IS_ALREADY_BUILT);
+    }
+    if (!middleware[method]) {
+      ;
+      [middleware, routes].forEach((handlerMap) => {
+        handlerMap[method] = /* @__PURE__ */ Object.create(null);
+        Object.keys(handlerMap[METHOD_NAME_ALL]).forEach((p) => {
+          handlerMap[method][p] = [...handlerMap[METHOD_NAME_ALL][p]];
+        });
+      });
+    }
+    if (path === "/*") {
+      path = "*";
+    }
+    const paramCount = (path.match(/\/:/g) || []).length;
+    if (/\*$/.test(path)) {
+      const re = buildWildcardRegExp(path);
+      if (method === METHOD_NAME_ALL) {
+        Object.keys(middleware).forEach((m) => {
+          middleware[m][path] ||= findMiddleware(middleware[m], path) || findMiddleware(middleware[METHOD_NAME_ALL], path) || [];
+        });
+      } else {
+        middleware[method][path] ||= findMiddleware(middleware[method], path) || findMiddleware(middleware[METHOD_NAME_ALL], path) || [];
+      }
+      Object.keys(middleware).forEach((m) => {
+        if (method === METHOD_NAME_ALL || method === m) {
+          Object.keys(middleware[m]).forEach((p) => {
+            re.test(p) && middleware[m][p].push([handler, paramCount]);
+          });
+        }
+      });
+      Object.keys(routes).forEach((m) => {
+        if (method === METHOD_NAME_ALL || method === m) {
+          Object.keys(routes[m]).forEach(
+            (p) => re.test(p) && routes[m][p].push([handler, paramCount])
+          );
+        }
+      });
+      return;
+    }
+    const paths = checkOptionalParameter(path) || [path];
+    for (let i = 0, len = paths.length; i < len; i++) {
+      const path2 = paths[i];
+      Object.keys(routes).forEach((m) => {
+        if (method === METHOD_NAME_ALL || method === m) {
+          routes[m][path2] ||= [
+            ...findMiddleware(middleware[m], path2) || findMiddleware(middleware[METHOD_NAME_ALL], path2) || []
+          ];
+          routes[m][path2].push([handler, paramCount - len + i + 1]);
+        }
+      });
+    }
+  }
+  match = match;
+  buildAllMatchers() {
+    const matchers = /* @__PURE__ */ Object.create(null);
+    Object.keys(this.#routes).concat(Object.keys(this.#middleware)).forEach((method) => {
+      matchers[method] ||= this.#buildMatcher(method);
+    });
+    this.#middleware = this.#routes = void 0;
+    clearWildcardRegExpCache();
+    return matchers;
+  }
+  #buildMatcher(method) {
+    const routes = [];
+    let hasOwnRoute = method === METHOD_NAME_ALL;
+    [this.#middleware, this.#routes].forEach((r) => {
+      const ownRoute = r[method] ? Object.keys(r[method]).map((path) => [path, r[method][path]]) : [];
+      if (ownRoute.length !== 0) {
+        hasOwnRoute ||= true;
+        routes.push(...ownRoute);
+      } else if (method !== METHOD_NAME_ALL) {
+        routes.push(
+          ...Object.keys(r[METHOD_NAME_ALL]).map((path) => [path, r[METHOD_NAME_ALL][path]])
+        );
+      }
+    });
+    if (!hasOwnRoute) {
+      return null;
+    } else {
+      return buildMatcherFromPreprocessedRoutes(routes);
+    }
+  }
+};
+
+// node_modules/hono/dist/router/smart-router/router.js
+var SmartRouter = class {
+  name = "SmartRouter";
+  #routers = [];
+  #routes = [];
+  constructor(init) {
+    this.#routers = init.routers;
+  }
+  add(method, path, handler) {
+    if (!this.#routes) {
+      throw new Error(MESSAGE_MATCHER_IS_ALREADY_BUILT);
+    }
+    this.#routes.push([method, path, handler]);
+  }
+  match(method, path) {
+    if (!this.#routes) {
+      throw new Error("Fatal error");
+    }
+    const routers = this.#routers;
+    const routes = this.#routes;
+    const len = routers.length;
+    let i = 0;
+    let res;
+    for (; i < len; i++) {
+      const router8 = routers[i];
+      try {
+        for (let i2 = 0, len2 = routes.length; i2 < len2; i2++) {
+          router8.add(...routes[i2]);
+        }
+        res = router8.match(method, path);
+      } catch (e) {
+        if (e instanceof UnsupportedPathError) {
+          continue;
+        }
+        throw e;
+      }
+      this.match = router8.match.bind(router8);
+      this.#routers = [router8];
+      this.#routes = void 0;
+      break;
+    }
+    if (i === len) {
+      throw new Error("Fatal error");
+    }
+    this.name = `SmartRouter + ${this.activeRouter.name}`;
+    return res;
+  }
+  get activeRouter() {
+    if (this.#routes || this.#routers.length !== 1) {
+      throw new Error("No active router has been determined yet.");
+    }
+    return this.#routers[0];
+  }
+};
+
+// node_modules/hono/dist/router/trie-router/node.js
+var emptyParams = /* @__PURE__ */ Object.create(null);
+var hasChildren = (children) => {
+  for (const _ in children) {
+    return true;
+  }
+  return false;
+};
+var Node2 = class _Node2 {
+  #methods;
+  #children;
+  #patterns;
+  #order = 0;
+  #params = emptyParams;
+  constructor(method, handler, children) {
+    this.#children = children || /* @__PURE__ */ Object.create(null);
+    this.#methods = [];
+    if (method && handler) {
+      const m = /* @__PURE__ */ Object.create(null);
+      m[method] = { handler, possibleKeys: [], score: 0 };
+      this.#methods = [m];
+    }
+    this.#patterns = [];
+  }
+  insert(method, path, handler) {
+    this.#order = ++this.#order;
+    let curNode = this;
+    const parts = splitRoutingPath(path);
+    const possibleKeys = [];
+    for (let i = 0, len = parts.length; i < len; i++) {
+      const p = parts[i];
+      const nextP = parts[i + 1];
+      const pattern = getPattern(p, nextP);
+      const key = Array.isArray(pattern) ? pattern[0] : p;
+      if (key in curNode.#children) {
+        curNode = curNode.#children[key];
+        if (pattern) {
+          possibleKeys.push(pattern[1]);
+        }
+        continue;
+      }
+      curNode.#children[key] = new _Node2();
+      if (pattern) {
+        curNode.#patterns.push(pattern);
+        possibleKeys.push(pattern[1]);
+      }
+      curNode = curNode.#children[key];
+    }
+    curNode.#methods.push({
+      [method]: {
+        handler,
+        possibleKeys: possibleKeys.filter((v, i, a) => a.indexOf(v) === i),
+        score: this.#order
+      }
+    });
+    return curNode;
+  }
+  #pushHandlerSets(handlerSets, node, method, nodeParams, params) {
+    for (let i = 0, len = node.#methods.length; i < len; i++) {
+      const m = node.#methods[i];
+      const handlerSet = m[method] || m[METHOD_NAME_ALL];
+      const processedSet = {};
+      if (handlerSet !== void 0) {
+        handlerSet.params = /* @__PURE__ */ Object.create(null);
+        handlerSets.push(handlerSet);
+        if (nodeParams !== emptyParams || params && params !== emptyParams) {
+          for (let i2 = 0, len2 = handlerSet.possibleKeys.length; i2 < len2; i2++) {
+            const key = handlerSet.possibleKeys[i2];
+            const processed = processedSet[handlerSet.score];
+            handlerSet.params[key] = params?.[key] && !processed ? params[key] : nodeParams[key] ?? params?.[key];
+            processedSet[handlerSet.score] = true;
+          }
+        }
+      }
+    }
+  }
+  search(method, path) {
+    const handlerSets = [];
+    this.#params = emptyParams;
+    const curNode = this;
+    let curNodes = [curNode];
+    const parts = splitPath(path);
+    const curNodesQueue = [];
+    const len = parts.length;
+    let partOffsets = null;
+    for (let i = 0; i < len; i++) {
+      const part = parts[i];
+      const isLast = i === len - 1;
+      const tempNodes = [];
+      for (let j = 0, len2 = curNodes.length; j < len2; j++) {
+        const node = curNodes[j];
+        const nextNode = node.#children[part];
+        if (nextNode) {
+          nextNode.#params = node.#params;
+          if (isLast) {
+            if (nextNode.#children["*"]) {
+              this.#pushHandlerSets(handlerSets, nextNode.#children["*"], method, node.#params);
+            }
+            this.#pushHandlerSets(handlerSets, nextNode, method, node.#params);
+          } else {
+            tempNodes.push(nextNode);
+          }
+        }
+        for (let k = 0, len3 = node.#patterns.length; k < len3; k++) {
+          const pattern = node.#patterns[k];
+          const params = node.#params === emptyParams ? {} : { ...node.#params };
+          if (pattern === "*") {
+            const astNode = node.#children["*"];
+            if (astNode) {
+              this.#pushHandlerSets(handlerSets, astNode, method, node.#params);
+              astNode.#params = params;
+              tempNodes.push(astNode);
+            }
+            continue;
+          }
+          const [key, name, matcher] = pattern;
+          if (!part && !(matcher instanceof RegExp)) {
+            continue;
+          }
+          const child = node.#children[key];
+          if (matcher instanceof RegExp) {
+            if (partOffsets === null) {
+              partOffsets = new Array(len);
+              let offset = path[0] === "/" ? 1 : 0;
+              for (let p = 0; p < len; p++) {
+                partOffsets[p] = offset;
+                offset += parts[p].length + 1;
+              }
+            }
+            const restPathString = path.substring(partOffsets[i]);
+            const m = matcher.exec(restPathString);
+            if (m) {
+              params[name] = m[0];
+              this.#pushHandlerSets(handlerSets, child, method, node.#params, params);
+              if (hasChildren(child.#children)) {
+                child.#params = params;
+                const componentCount = m[0].match(/\//)?.length ?? 0;
+                const targetCurNodes = curNodesQueue[componentCount] ||= [];
+                targetCurNodes.push(child);
+              }
+              continue;
+            }
+          }
+          if (matcher === true || matcher.test(part)) {
+            params[name] = part;
+            if (isLast) {
+              this.#pushHandlerSets(handlerSets, child, method, params, node.#params);
+              if (child.#children["*"]) {
+                this.#pushHandlerSets(
+                  handlerSets,
+                  child.#children["*"],
+                  method,
+                  params,
+                  node.#params
+                );
+              }
+            } else {
+              child.#params = params;
+              tempNodes.push(child);
+            }
+          }
+        }
+      }
+      const shifted = curNodesQueue.shift();
+      curNodes = shifted ? tempNodes.concat(shifted) : tempNodes;
+    }
+    if (handlerSets.length > 1) {
+      handlerSets.sort((a, b) => {
+        return a.score - b.score;
+      });
+    }
+    return [handlerSets.map(({ handler, params }) => [handler, params])];
+  }
+};
+
+// node_modules/hono/dist/router/trie-router/router.js
+var TrieRouter = class {
+  name = "TrieRouter";
+  #node;
+  constructor() {
+    this.#node = new Node2();
+  }
+  add(method, path, handler) {
+    const results = checkOptionalParameter(path);
+    if (results) {
+      for (let i = 0, len = results.length; i < len; i++) {
+        this.#node.insert(method, results[i], handler);
+      }
+      return;
+    }
+    this.#node.insert(method, path, handler);
+  }
+  match(method, path) {
+    return this.#node.search(method, path);
+  }
+};
+
+// node_modules/hono/dist/hono.js
+var Hono2 = class extends Hono {
+  /**
+   * Creates an instance of the Hono class.
+   *
+   * @param options - Optional configuration options for the Hono instance.
+   */
+  constructor(options = {}) {
+    super(options);
+    this.router = options.router ?? new SmartRouter({
+      routers: [new RegExpRouter(), new TrieRouter()]
+    });
+  }
+};
+
+// node_modules/hono/dist/middleware/cors/index.js
+var cors = (options) => {
+  const opts = {
+    origin: "*",
+    allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "PATCH"],
+    allowHeaders: [],
+    exposeHeaders: [],
+    ...options
+  };
+  const findAllowOrigin = ((optsOrigin) => {
+    if (typeof optsOrigin === "string") {
+      if (optsOrigin === "*") {
+        return () => optsOrigin;
+      } else {
+        return (origin) => optsOrigin === origin ? origin : null;
+      }
+    } else if (typeof optsOrigin === "function") {
+      return optsOrigin;
+    } else {
+      return (origin) => optsOrigin.includes(origin) ? origin : null;
+    }
+  })(opts.origin);
+  const findAllowMethods = ((optsAllowMethods) => {
+    if (typeof optsAllowMethods === "function") {
+      return optsAllowMethods;
+    } else if (Array.isArray(optsAllowMethods)) {
+      return () => optsAllowMethods;
+    } else {
+      return () => [];
+    }
+  })(opts.allowMethods);
+  return async function cors2(c, next) {
+    function set(key, value) {
+      c.res.headers.set(key, value);
+    }
+    const allowOrigin = await findAllowOrigin(c.req.header("origin") || "", c);
+    if (allowOrigin) {
+      set("Access-Control-Allow-Origin", allowOrigin);
+    }
+    if (opts.credentials) {
+      set("Access-Control-Allow-Credentials", "true");
+    }
+    if (opts.exposeHeaders?.length) {
+      set("Access-Control-Expose-Headers", opts.exposeHeaders.join(","));
+    }
+    if (c.req.method === "OPTIONS") {
+      if (opts.origin !== "*") {
+        set("Vary", "Origin");
+      }
+      if (opts.maxAge != null) {
+        set("Access-Control-Max-Age", opts.maxAge.toString());
+      }
+      const allowMethods = await findAllowMethods(c.req.header("origin") || "", c);
+      if (allowMethods.length) {
+        set("Access-Control-Allow-Methods", allowMethods.join(","));
+      }
+      let headers = opts.allowHeaders;
+      if (!headers?.length) {
+        const requestHeaders = c.req.header("Access-Control-Request-Headers");
+        if (requestHeaders) {
+          headers = requestHeaders.split(/\s*,\s*/);
+        }
+      }
+      if (headers?.length) {
+        set("Access-Control-Allow-Headers", headers.join(","));
+        c.res.headers.append("Vary", "Access-Control-Request-Headers");
+      }
+      c.res.headers.delete("Content-Length");
+      c.res.headers.delete("Content-Type");
+      return new Response(null, {
+        headers: c.res.headers,
+        status: 204,
+        statusText: "No Content"
+      });
+    }
+    await next();
+    if (opts.origin !== "*") {
+      c.header("Vary", "Origin", { append: true });
+    }
+  };
+};
+
+// src/SystemConfig.js
+var SystemConfig = {
+  corsSwitch: true,
+  // 是否开启跨域
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  // 允许的请求方法
+  file_upload_max_size: 100 * 1024 * 1024
+  // 文件最大限制，单位：字节
+};
+var SystemConfig_default = SystemConfig;
+
+// src/SystemConfigCF.js
+var SystemConfigCF = {
+  Worker: {
+    request_max_count: 9e4
+  },
+  cloudflare_kv: {
+    save_size: 1024 * 1024 * 1024 * 0.9,
+    // 900MB
+    read_max_count: 9e5,
+    write_max_count: 9e6,
+    delete_max_count: 9e6,
+    list_max_count: 9e6
+  },
+  cloudflare_d1: {
+    database_max_count: 3,
+    database_save_size: 1024 * 1024 * 1024 * 9,
+    // 9GB
+    read_max_count: 4e7,
+    write_max_count: 4e6
+  },
+  cloudflare_r2: {
+    save_size: 9437184
+  }
+};
+var SystemConfigCF_default = SystemConfigCF;
+
+// src/utils/utils.js
+var getType = (obj) => {
+  return Object.prototype.toString.call(obj).slice(8, -1);
+};
+var ObjectType = {
+  Object: "Object",
+  Array: "Array",
+  Date: "Date",
+  RegExp: "RegExp",
+  Function: "Function",
+  Null: "Null",
+  Undefined: "Undefined",
+  Number: "Number",
+  String: "String",
+  Boolean: "Boolean"
+};
+function isValidValue(value) {
+  if (value === null || value === void 0) {
+    return false;
+  }
+  if (typeof value === "string" && value.trim() === "") {
+    return false;
+  }
+  if (Array.isArray(value) && value.length === 0) {
+    return false;
+  }
+  if (typeof value === "object" && !Array.isArray(value)) {
+    return Object.keys(value).length !== 0;
+  }
+  if (typeof value === "number" && isNaN(value)) {
+    return false;
+  }
+  return true;
+}
+async function md5(message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest("MD5", msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function toMd5(input) {
+  let buffer;
+  if (input instanceof Blob) {
+    buffer = await input.arrayBuffer();
+  } else if (typeof input === "string") {
+    buffer = new TextEncoder().encode(input);
+  } else if (input instanceof ArrayBuffer) {
+    buffer = input;
+  } else if (input && input.buffer instanceof ArrayBuffer) {
+    buffer = input.buffer;
+  } else {
+    buffer = new TextEncoder().encode(String(input));
+  }
+  const hashBuffer = await crypto.subtle.digest("MD5", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+function getCurrentDate(timestamp = Date.now(), format = "YYYY-MM-DD HH:mm:ss") {
+  const now = new Date(timestamp);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  let formattedDate = format.replace("YYYY", year);
+  formattedDate = formattedDate.replace("MM", month);
+  formattedDate = formattedDate.replace("DD", day);
+  formattedDate = formattedDate.replace("HH", hours);
+  formattedDate = formattedDate.replace("mm", minutes);
+  formattedDate = formattedDate.replace("ss", seconds);
+  return formattedDate;
+}
+function getDatePrevious(timestamp = Date.now(), format = "1M") {
+  const match2 = format.match(/^(\d+)([yMdHms])$/);
+  if (!match2) {
+    console.error("Invalid format string. Expected format: {number}{unit}, e.g., '1y', '3M', '7d'");
+    return void 0;
+  }
+  const num = parseInt(match2[1], 10);
+  const unit = match2[2];
+  if (num < 1) {
+    return void 0;
+  }
+  const now = new Date(timestamp);
+  switch (unit) {
+    case "y":
+      now.setFullYear(now.getFullYear() - num);
+      break;
+    case "M":
+      now.setMonth(now.getMonth() - num);
+      break;
+    case "d":
+      now.setDate(now.getDate() - num);
+      break;
+    case "H":
+      now.setHours(now.getHours() - num);
+      break;
+    case "m":
+      now.setMinutes(now.getMinutes() - num);
+      break;
+    case "s":
+      now.setSeconds(now.getSeconds() - num);
+      break;
+    default:
+      console.error("Invalid time unit. Supported units: y(year), M(month), d(day), H(hour), m(minute), s(second)");
+      return void 0;
+  }
+  return now.getTime();
+}
+function formatFileSize(bytes) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
+
+// src/filterValidToken.js
+function filterValidToken(c) {
+  let userTokens = c.env.USER_TOKENS;
+  if (getType(userTokens) !== ObjectType.String) {
+    return false;
+  }
+  const userToken = getRequestHeaders(c)["token"];
+  if (!isValidValue(userToken) || userTokens !== userToken) {
+    return false;
+  }
+  return true;
+}
+function getRequestHeaders(c) {
+  return c.req.header();
+}
+
+// src/handle/handleExtendRequestBodyParser.js
+async function handleExtendRequestBodyParser(request) {
+  const contentType = request.header("content-type") || "";
+  let params = {};
+  const urlParams = new URL(request.url).searchParams;
+  urlParams.forEach((value, key) => {
+    params[key] = value;
+  });
+  if (request.method !== "GET") {
+    if (contentType.includes("application/json")) {
+      const data = await request.json();
+      if (data) {
+        if (getType(data) === ObjectType.Array) {
+          params = data;
+        } else if (getType(data) === ObjectType.Object) {
+          params = { ...params, ...data };
+        }
+      }
+    } else if (contentType.includes("form-data")) {
+      const formData = await request.formData();
+      for (const [key, value] of formData.entries()) {
+        params[key] = value;
+      }
+    } else if (contentType.includes("x-www-form-urlencoded")) {
+      const text = await request.text();
+      new URLSearchParams(text).forEach((value, key) => {
+        params[key] = value;
+      });
+    }
+    request.__body = params;
+  } else {
+    request.__query = params;
+  }
+  return request;
+}
+
+// src/handle/handleExtendRequest.js
+async function handleExtendRequest(c) {
+  let request = c.request || c.req;
+  request.headers = request.raw.headers;
+  request = await handleExtendRequestBodyParser(request);
+  const obj = { getValues, getValuesPage, getValueByIdToArray, getValueByIdToObject, getValueById };
+  Object.keys(obj).forEach((key) => {
+    request[key] = obj[key];
+    c[key] = obj[key];
+  });
+  c.getValues = function() {
+    return this.req.getValues();
+  };
+  return c;
+}
+function getValues() {
+  console.log(`\u6536\u5230\u8BF7\u6C42\u6570\u636E\uFF0C\u65B9\u6CD5\uFF1A${this.method}\uFF0C\u5730\u5740\uFF1A${this.url}\uFF0C\u53C2\u6570\uFF1A`);
+  console.log(this.method === "GET" ? this.__query : this.__body);
+  return this.method === "GET" ? this.__query : this.__body;
+}
+function getValuesPage() {
+  const values = this.getValues() || {};
+  try {
+    let { index, size } = values;
+    index = Number(index);
+    if (Number.isNaN(index)) {
+      index = 1;
+    }
+    size = Number(size);
+    if (Number.isNaN(size)) {
+      size = 30;
+    }
+    values.pageIndex = index;
+    values.pageSize = size;
+    values.pageRowNum = (index - 1) * size;
+  } catch (error) {
+    throw error;
+  }
+  return values;
+}
+function getValueByIdToArray(keys, targetObj) {
+  let obj = targetObj || this.getValues();
+  const result = [];
+  keys.map((item) => {
+    result.push(obj[item]);
+  });
+  return result;
+}
+function getValueByIdToObject(keys, targetObj) {
+  let obj = targetObj || this.getValues();
+  const result = {};
+  keys.map((item) => {
+    result[item] = obj[item];
+  });
+  return result;
+}
+function getValueById(key) {
+  return this.getValues()[key];
+}
+
+// src/handle/handleExtendResponse.js
+function handleExtendBindMessage(c) {
+  const obj = { sendSuccess, sendWarning, sendError };
+  Object.keys(obj).forEach((key) => {
+    c[key] = obj[key];
+  });
+  return c;
+}
+function sendSuccess(result) {
+  let refResult = {
+    status: 200,
+    message: "success"
+  };
+  if (result instanceof Error) {
+    return this.sendError(result);
+  } else if (getType(result) === ObjectType.Object) {
+    refResult = Object.assign(refResult, result);
+  } else if (getType(result) === ObjectType.String) {
+    refResult = Object.assign(refResult, {
+      message: result
+    });
+  }
+  return handleResponse(refResult, this);
+}
+function sendError(result) {
+  let refResult = {
+    status: 500,
+    message: "error"
+  };
+  if (result instanceof Error) {
+    refResult = Object.assign(refResult, {
+      message: result.message || "error"
+    });
+  } else if (getType(result) === ObjectType.Object) {
+    refResult = Object.assign(refResult, result);
+  } else if (getType(result) === ObjectType.String) {
+    refResult = Object.assign(refResult, {
+      message: result
+    });
+  }
+  return handleResponse(refResult, this);
+}
+function sendWarning(result) {
+  let refResult = {
+    status: 500,
+    message: "warning"
+  };
+  if (result instanceof Error) {
+    return this.sendError(result);
+  } else if (getType(result) === ObjectType.Object) {
+    refResult = Object.assign(refResult, result);
+  } else if (getType(result) === ObjectType.String) {
+    refResult = Object.assign(refResult, {
+      message: result
+    });
+  }
+  return handleResponse(refResult, this);
+}
+function handleResponse(result, c) {
+  let text = null;
+  try {
+    text = JSON.stringify(result);
+  } catch (error) {
+    text = JSON.stringify({ status: 500, message: "JSON\u683C\u5F0F\u8F6C\u6362\u5931\u8D25" });
+  }
+  return new Response(text, {
+    status: result.status || 200,
+    headers: c.refHeaders || {
+      "Content-Type": "application/json; charset=UTF-8"
+    }
+  });
+}
+
+// src/api/test/index.js
+var router = new Hono2();
+router.get("/", async (c) => {
+  const { uuid } = c.getValues();
+  return c.sendSuccess({ message: "Hello from test!", uuid });
+});
+var test_default = router;
+
+// src/api/test/request.js
+var router2 = new Hono2();
+router2.get("/", async (c) => {
+  const { uuid } = c.getValues();
+  return c.sendSuccess({ message: "Hello from test!", uuid });
+});
+var request_default = router2;
+
+// src/utils/db/ClassDBConnection.js
+var { APP_DATABASE } = SystemConfig_default;
+var ClassDBConnection = class {
+  constructor() {
+    this._isopen = false;
+  }
+  init(env) {
+    this.env = env;
+    this.DB = env.DB;
+    this.__packSwitch = true;
+  }
+  // 设置控制台开关
+  setPackSwitch(bool) {
+    this.__packSwitch = bool;
+  }
+  connection() {
+    try {
+      this.__isopen = true;
+      return true;
+    } catch (error) {
+      throw new Error(`\u6570\u636E\u5E93\u8FDE\u63A5\u5F02\u5E38\uFF1A${error.message}`);
+    }
+  }
+  open() {
+    if (this._isopen !== true) {
+      return this.connection();
+    }
+    return false;
+  }
+  close() {
+    try {
+      this._isopen = false;
+    } catch (e) {
+    }
+  }
+  isOpen() {
+    return this._isopen;
+  }
+  /**
+   * 执行数据库命令
+   * @param {*} sql       sql语句
+   * @param {*} params    sql参数
+   * @param {*} isPack    是否包装查询，默认为true
+   * @returns 
+   */
+  query(sql, params, isPack = true) {
+    if (isPack) {
+      sql = this.packagingQueryBefore(sql);
+    }
+    console.log(`\u51C6\u5907\u6267\u884C\u7684sql\uFF1A`, sql);
+    console.log(`\u51C6\u5907\u63D0\u4EA4\u7684\u53C2\u6570`, params);
+    return new Promise((resolve, reject) => {
+      this.DB.prepare(sql).bind(...params).run().then((result) => {
+        resolve(result.results);
+      }).catch((error) => {
+        reject(error);
+      });
+    });
+  }
+  exec(sql) {
+    console.log(`\u51C6\u5907\u6267\u884C\u7684sql\uFF1A`, sql);
+    return new Promise((resolve, reject) => {
+      try {
+        const result = this.DB.exec(sql);
+        resolve(result);
+      } catch (error) {
+        reject(new Error("\u6570\u636E\u5E93\u6267\u884C\u9519\u8BEF\uFF0C\u8BF7\u68C0\u67E5\u63D0\u4EA4\u53C2\u6570"));
+      }
+    });
+  }
+  // 在查询打包之前执行
+  packagingQueryBefore(value) {
+    if (!this.__packSwitch) {
+      return value;
+    }
+    const newValue = value.replace(/^\s+/g, "");
+    if (/^SELECT\b(?!\s+COUNT\b)/i.test(newValue)) {
+      value = `
                     SELECT
                         ROW_NUMBER() OVER() AS row_num,
                         result.id AS 'row_key',
                         result.*
                     FROM (
-                            ${e}
+                            ${value}
                         ) AS result
-                    `),e}transactionBegin(e=!1){this.query(e?"BEGIN EXCLUSIVE TRANSACTION;":"BEGIN;")}transactionSavePoint(e){this.query(`SAVEPOINT ${e}`)}transactionRollbackToSavePoint(e){this.query(`ROLLBACK TO SAVEPOINT ${e}`)}transactionCommit(){this.query("commit")}transactionRollback(){this.query("ROLLBACK")}async exportSql(){let e=this.DB;if(!e)throw new Error("\u6570\u636E\u5E93\u7ED1\u5B9A\u672A\u63D0\u4F9B\u3002");let r="";r+=`PRAGMA foreign_keys = OFF;
-`,r+=`BEGIN TRANSACTION;
-
-`;try{let n=(await e.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'tb_%'").all()).results.map(a=>a.name);if(n.length===0)return r+`COMMIT;
-PRAGMA foreign_keys = ON;
-`;for(let a of n){r+=`--
--- Table: ${a}
+                    `;
+    }
+    return value;
+  }
+  /**
+   * 开启事务
+   * @param {*} bool ，是否独占模式，默认false
+   */
+  transactionBegin(bool = false) {
+    this.query(bool ? "BEGIN EXCLUSIVE TRANSACTION;" : "BEGIN;");
+  }
+  // 保存事务的回滚点
+  transactionSavePoint(name) {
+    this.query(`SAVEPOINT ${name}`);
+  }
+  // 回滚到事务的回滚点
+  transactionRollbackToSavePoint(name) {
+    this.query(`ROLLBACK TO SAVEPOINT ${name}`);
+  }
+  // 提交事务
+  transactionCommit() {
+    this.query("commit");
+  }
+  // 回滚事务
+  transactionRollback() {
+    this.query("ROLLBACK");
+  }
+  /**
+   * 导出数据库为sql
+   */
+  async exportSql() {
+    console.log("--- Cloudflare D1 SQL \u5BFC\u51FA\u5F00\u59CB ---");
+    const db = this.DB;
+    if (!db) {
+      console.error("\u9519\u8BEF: \u6570\u636E\u5E93\u7ED1\u5B9A\u672A\u63D0\u4F9B\u3002");
+      throw new Error("\u6570\u636E\u5E93\u7ED1\u5B9A\u672A\u63D0\u4F9B\u3002");
+    }
+    let sql = "";
+    sql += "PRAGMA foreign_keys = OFF;\n";
+    sql += "BEGIN TRANSACTION;\n\n";
+    try {
+      const tablesResult = await db.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'tb_%'"
+      ).all();
+      const tableNames = tablesResult.results.map((t) => t.name);
+      if (tableNames.length === 0) {
+        console.warn("\u672A\u627E\u5230\u4EFB\u4F55\u7528\u6237\u5B9A\u4E49\u7684\u8868\u3002");
+        return sql + "COMMIT;\nPRAGMA foreign_keys = ON;\n";
+      }
+      console.log("\u627E\u5230\u4EE5\u4E0B\u8868:", tableNames.join(", "));
+      for (const tableName4 of tableNames) {
+        console.log(`--- \u5904\u7406\u8868: ${tableName4} ---`);
+        sql += `--
+-- Table: ${tableName4}
 --
-`;let o=await e.prepare("SELECT sql FROM sqlite_master WHERE name=?").bind(a).first();if(o&&o.sql)r+=o.sql+`;
-`;else continue;let c=(await e.prepare(`SELECT * FROM ${a}`).all()).results;if(c&&c.length>0)for(let i of c){let u=Object.keys(i).map(f=>`\`${f}\``).join(", "),d=Object.values(i).map(f=>typeof f=="string"?`'${f.replace(/'/g,"''")}'`:f==null?"NULL":typeof f=="boolean"?f?1:0:f).join(", ");r+=`INSERT INTO \`${a}\` (${u}) VALUES (${d});
-`}r+=`
-`}}catch(s){throw r=`ROLLBACK;
-`,s}return r+=`COMMIT;
-`,r+=`PRAGMA foreign_keys = ON;
-`,r}},m=We;var{file_upload_max_size:ss}=z;var ns="tb_admin";var Lt=new w;Lt.post("/accountVerification",async t=>{let e=new m;e.init(t.env);let r=[],s,n="where 1=1",a,o;try{r=["username","password"];let{username:l,password:c}=t.getValues(),i=await ie(c);if(s=[l,i],r.map(d=>{n+=` and d.${d}=? `}),s=s.filter(d=>d!=null),s.length<2)return t.sendError("\u53C2\u6570\u7F3A\u5931\u6216\u4E0D\u662F\u6709\u6548\u53C2\u6570");o=`
+`;
+        const schemaResult = await db.prepare(
+          "SELECT sql FROM sqlite_master WHERE name=?"
+        ).bind(tableName4).first();
+        if (schemaResult && schemaResult.sql) {
+          sql += schemaResult.sql + ";\n";
+          console.log(`\u5DF2\u6DFB\u52A0\u8868 ${tableName4} \u7684\u7ED3\u6784\u3002`);
+        } else {
+          console.warn(`\u8B66\u544A: \u672A\u80FD\u83B7\u53D6\u8868 ${tableName4} \u7684\u7ED3\u6784 (CREATE TABLE \u8BED\u53E5)\u3002`);
+          continue;
+        }
+        const rowsResult = await db.prepare(
+          `SELECT * FROM ${tableName4}`
+        ).all();
+        const rows = rowsResult.results;
+        if (rows && rows.length > 0) {
+          console.log(`\u627E\u5230 ${rows.length} \u6761\u6570\u636E\u7528\u4E8E\u8868 ${tableName4}\u3002`);
+          for (const row of rows) {
+            const columnNames = Object.keys(row).map((col) => `\`${col}\``).join(", ");
+            const values = Object.values(row).map((v) => {
+              if (typeof v === "string") {
+                return `'${v.replace(/'/g, "''")}'`;
+              } else if (v === null || v === void 0) {
+                return "NULL";
+              } else if (typeof v === "boolean") {
+                return v ? 1 : 0;
+              }
+              return v;
+            }).join(", ");
+            sql += `INSERT INTO \`${tableName4}\` (${columnNames}) VALUES (${values});
+`;
+          }
+          console.log(`\u5DF2\u6DFB\u52A0\u8868 ${tableName4} \u7684\u6570\u636E\u3002`);
+        } else {
+          console.log(`\u8868 ${tableName4} \u6CA1\u6709\u6570\u636E\u3002`);
+        }
+        sql += "\n";
+      }
+    } catch (error) {
+      console.error("\u5728\u5BFC\u51FAD1 SQL\u8FC7\u7A0B\u4E2D\u53D1\u751F\u9519\u8BEF:", error);
+      sql = "ROLLBACK;\n";
+      throw error;
+    }
+    sql += "COMMIT;\n";
+    sql += "PRAGMA foreign_keys = ON;\n";
+    console.log("--- Cloudflare D1 SQL \u5BFC\u51FA\u5B8C\u6210 ---");
+    return sql;
+  }
+};
+var ClassDBConnection_default = ClassDBConnection;
+
+// src/api/user.accountVerification.js
+var { file_upload_max_size } = SystemConfig_default;
+var tableName = "tb_admin";
+var router3 = new Hono2();
+router3.post("/accountVerification", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  let sqlFields = [], sqlParams, sqlWhere = "where 1=1", sqlSpace, sqlValue;
+  try {
+    sqlFields = ["username", "password"];
+    const { username, password } = c.getValues();
+    const hashedPassword = await md5(password);
+    sqlParams = [username, hashedPassword];
+    sqlFields.map((item) => {
+      sqlWhere += ` and d.${item}=? `;
+    });
+    sqlParams = sqlParams.filter((item) => {
+      return item != null;
+    });
+    if (sqlParams.length < 2) {
+      return c.sendError("\u53C2\u6570\u7F3A\u5931\u6216\u4E0D\u662F\u6709\u6548\u53C2\u6570");
+    }
+    sqlValue = `
             SELECT
                 d.id,
                 d.username,
-                '${t.env.USER_TOKENS}' AS token,
-                CAST(${ss} AS NUMERIC) AS file_upload_max_size
+                '${c.env.USER_TOKENS}' AS token,
+                CAST(${file_upload_max_size} AS NUMERIC) AS file_upload_max_size
             FROM
-                ${ns} AS d
-                ${n}
-            `,e.open();let u=await e.query(o,s);return e.close(),u.length<1?t.sendError("\u8D26\u6237\u6216\u5BC6\u7801\u4E0D\u6B63\u786E\uFF0C\u9A8C\u8BC1\u5931\u8D25"):t.sendSuccess({result:u[0]})}catch(l){return e.close(),t.sendError(l)}});var kt=Lt;var Wt="tb_admin",Yt=["username","password"];var v="id",K=Wt,qe=Yt,G=new w;G.get("/",async t=>{let e=new m;e.init(t.env);let r=[],s=[],n="where 1=1",a,o;try{let{uuid:l}=t.getValues();r=[v];let{pageSize:c,pageRowNum:i,pageIndex:u}=t.getValuesPage();r.map(g=>{let E=t.getValueById(g);S(E)&&(n+=` and d.${g}=? `,s.push(E))});let d=`
+                ${tableName} AS d
+                ${sqlWhere}
+            `;
+    classDBConnection.open();
+    let result = await classDBConnection.query(sqlValue, sqlParams);
+    classDBConnection.close();
+    if (result.length < 1) {
+      return c.sendError("\u8D26\u6237\u6216\u5BC6\u7801\u4E0D\u6B63\u786E\uFF0C\u9A8C\u8BC1\u5931\u8D25");
+    }
+    return c.sendSuccess({ result: result[0] });
+  } catch (error) {
+    classDBConnection.close();
+    return c.sendError(error);
+  }
+});
+var user_accountVerification_default = router3;
+
+// src/api/admin/admin.config.js
+var conf_uuidName = "id";
+var conf_tableName = "tb_admin";
+var conf_tableColumns = [
+  "username",
+  "password"
+];
+
+// src/api/admin/admin.js
+var uuidName = conf_uuidName;
+var tableName2 = conf_tableName;
+var tableColumns = conf_tableColumns;
+var router4 = new Hono2();
+router4.get("/", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  let sqlFields = [], sqlParams = [], sqlWhere = "where 1=1", sqlSpace, sqlValue;
+  try {
+    const { uuid } = c.getValues();
+    sqlFields = [uuidName];
+    let { pageSize, pageRowNum, pageIndex } = c.getValuesPage();
+    sqlFields.map((item) => {
+      const value = c.getValueById(item);
+      if (isValidValue(value)) {
+        sqlWhere += ` and d.${item}=? `;
+        sqlParams.push(value);
+      }
+    });
+    let sqlValue2 = `
                     SELECT
                         d.*
                     FROM
-                        ${K} AS d
-                        ${n} 
-                        order by d.${v} desc limit ? offset ?
-                    `;e.open();let f=await e.query(d,[...s,c,i]);f.map(g=>{g.create_time=_(g.create_time)});let p={total:(await e.query(`select count(d.id) as total from ${K} as d ${n}`,s))[0].total,pageSize:c,pageIndex:u};return e.close(),t.sendSuccess({message:"success",result:f,page:p})}catch(l){return e.close(),t.sendError(l)}});G.post("/",async t=>{let e=new m;e.init(t.env);let r=qe,s,n="where 1=1",a,o;try{let{username:l,password:c}=t.getValues(),i=await ie(c);return s=[l,i],o=`
-                    insert into ${K}
-                        (${r.join(",")},create_time)
+                        ${tableName2} AS d
+                        ${sqlWhere} 
+                        order by d.${uuidName} desc limit ? offset ?
+                    `;
+    classDBConnection.open();
+    let result = await classDBConnection.query(sqlValue2, [...sqlParams, pageSize, pageRowNum]);
+    result.map((item) => {
+      item.create_time = getCurrentDate(item.create_time);
+    });
+    const pageResult = await classDBConnection.query(`select count(d.id) as total from ${tableName2} as d ${sqlWhere}`, sqlParams);
+    const page = {
+      total: pageResult[0]["total"],
+      pageSize,
+      pageIndex
+    };
+    classDBConnection.close();
+    return c.sendSuccess({
+      message: "success",
+      result,
+      page
+    });
+  } catch (error) {
+    classDBConnection.close();
+    return c.sendError(error);
+  }
+});
+router4.post("/", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  let sqlFields = tableColumns, sqlParams, sqlWhere = "where 1=1", sqlSpace, sqlValue;
+  try {
+    const { username, password } = c.getValues();
+    const hashedPassword = await md5(password);
+    sqlParams = [username, hashedPassword];
+    sqlValue = `
+                    insert into ${tableName2}
+                        (${sqlFields.join(",")},create_time)
                     values
-                        (${r.map(u=>"?").join(",")},${Date.now()})
-                    `,await e.query(o,s),e.close(),t.sendSuccess()}catch(l){return e.close(),t.sendError(l)}});G.put("/",async t=>{let e=new m;e.init(t.env);let r=qe,s,n="where 1=1",a,o;try{let l=t.getValueById(v),{username:c,password:i}=t.getValues();if(S(i)){let u=await ie(i);s=[c,u]}else r=["username"],s=[c];return s.push(l),a=r.map(u=>`${u}=?`).join(","),n+=` and ${v}=? `,o=`update ${K} set ${a} ${n}`,e.open(),await e.query(o,s),e.close(),t.sendSuccess({message:"success"})}catch(l){return e.close(),t.sendError(l)}});G.delete("/",async t=>{let e=new m;e.init(t.env);let r=qe,s,n="where 1=1",a;try{let o=t.getValueById(v);return r=[v],s=t.getValueByIdToArray(r),r.map(l=>{n+=` and ${l}=? `}),a=`delete from ${K} ${n}`,e.open(),await e.query(a,s),e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});G.delete("/multiple",async t=>{let e=new m;e.init(t.env);let r=qe,s,n="where 1=1",a;try{if(r=[],s=t.getValues(),R(s)!=="Array")throw new Error("\u53C2\u6570\u9519\u8BEF");e.open();for await(let o of s)n=` where 1=1 and ${v}=? `,a=`delete from ${K} ${n}`,await e.query(a,[o]);return e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});var Ut=G;var J="tb_blogs",ce=["title","titleDecodeValue","tags","jianshu","content","classId","key","readTop","readCount"],B={conf_uuidName:"id",conf_tableName:J,conf_tableColumns:ce};var N="id",M=J,Ue=ce,H=new w;H.get("/",async t=>{let e=new m;e.init(t.env);let r=[],s=[],n="where 1=1",a,o;try{let{pageSize:l,pageRowNum:c,pageIndex:i}=t.getValuesPage();r=[N,"searchText","classId"],r.map(g=>{let E=t.getValueById(g);S(E)&&(g==="searchText"?(n+=" and d.tileDecodeValue like ? ",s.push(`%${E}%`)):(n+=` and d.${g}=? `,s.push(E)))});let u=`
-                    SELECT
-                        b.name as className,d.*
-                    FROM
-                        ${M} AS d
-                    LEFT JOIN 
-                        tb_blog_class AS b ON b.id=d.classId
-                        ${n} 
-                    ORDER BY d.${N} DESC LIMIT ? OFFSET ?
-                    `;e.open();let d=await e.query(u,[...s,l,c]),f=["blogTitle"];d.map(g=>{g.create_time=_(g.create_time,"YYYY-MM-DD HH:mm:ss"),g.readTop=g.readTop==="true"});let p={total:(await e.query(`SELECT COUNT(d.${N}) AS total FROM ${M} AS d ${n}`,s))[0].total,pageSize:l,pageIndex:i};return e.close(),t.sendSuccess({message:"success",result:d,page:p})}catch(l){return e.close(),t.sendError(l)}});H.post("/",async t=>{let e=new m;e.init(t.env);let r=Ue,s,n="where 1=1",a,o;try{let l=t.getValues(),{key:c,title:i,content:u}=l,d=D(c,i),f=D(c,u),h=f.substring(0,100);return l.titleDecodeValue=d,l.contentDecodeValue=f,l.jianshu=Le(c,h),l.readCount=0,s=t.getValueByIdToArray(r),o=`
-                    insert into ${M}
-                        (${r.join(",")},create_time)
-                    values
-                        (${r.map(p=>"?").join(",")},${Date.now()})
-                    `,await e.query(o,s),e.close(),t.sendSuccess()}catch(l){return e.close(),t.sendError(l)}});H.put("/",async t=>{let e=new m;e.init(t.env);let r=Ue,s,n="where 1=1",a,o;try{let l=t.getValueById(N),c=t.getValues(),{key:i,title:u,content:d}=c,f=D(i,u),h=D(i,d),p=h.substring(0,100);return c.titleDecodeValue=f,c.contentDecodeValue=h,c.jianshu=Le(i,p),s=t.getValueByIdToArray(r),a=r.map(g=>`${g}=?`).join(","),a+=",update_time=?",s.push(Date.now()),n+=` and ${N}=? `,s.push(l),o=`update ${M} set ${a} ${n}`,e.open(),await e.query(o,s),e.close(),t.sendSuccess({message:"success"})}catch(l){return e.close(),t.sendError(l)}});H.put("/readTop",async t=>{let e=new m;e.init(t.env);let r=Ue,s,n="where 1=1",a,o;try{let l=t.getValueById(N);return r=["readTop"],s=t.getValueByIdToArray(r),a=r.map(c=>`${c}=?`).join(","),a+=",update_time=?",s.push(Date.now()),n+=` and ${N}=? `,s.push(l),o=`update ${M} set ${a} ${n}`,e.open(),await e.query(o,s),e.close(),t.sendSuccess({message:"success"})}catch(l){return e.close(),t.sendError(l)}});H.delete("/",async t=>{let e=new m;e.init(t.env);let r=[],s,n="where 1=1",a;try{return r=[N],s=t.getValueByIdToArray(r),r.map(o=>{n+=` and ${o}=? `}),a=`delete from ${M} ${n}`,e.open(),await e.query(a,s),e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});H.delete("/multiple",async t=>{let e=new m;e.init(t.env);let r=[],s,n="where 1=1",a;try{if(r=[],s=t.getValues(),R(s)!=="Array")throw new Error("\u53C2\u6570\u9519\u8BEF");e.open();for await(let o of s)n=` where 1=1 and ${N}=? `,a=`delete from ${M} ${n}`,await e.query(a,[o]);return e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});var zt=H;var Kt="tb_blogs",Gt=["title","tileDecodeValue","tags","jianshu","content","html","classId","key","readTop","readVisibility","readCount","userId","create_time","update_time"];var Jt="id",ls=Kt,is=Gt,Qt=new w;Qt.post("/",async t=>{let e=new m;e.init(t.env);let r=is,s;try{let n=t.getValues();if(!Array.isArray(n)||n.length<1)return t.sendError({message:"\u53C2\u6570\u9519\u8BEF\uFF0C\u5FC5\u987B\u662F\u6570\u7EC4"});for(let a of n)try{s=[a[Jt]],r.forEach(l=>{s.push(a[l])});let o=`
-                    insert into ${ls}
-                        (${Jt},${r.join(",")})
-                    values
-                        (?,${r.map(l=>"?").join(",")})
-                    `;await e.query(o,s)}catch{}return e.close(),t.sendSuccess()}catch(n){return e.close(),t.sendError(n)}});var Xt=Qt;var Zt=J;var er=new w;er.get("/list/simple",async t=>{let e=new m;e.init(t.env);let r=[],s=[],n="WHERE 1=1",a,o;try{let{pageSize:l,pageRowNum:c,pageIndex:i}=t.getValuesPage();r=["searchText","classId"],r.map(p=>{let g=t.getValueById(p);S(g)&&(p==="searchText"?(n+=" and d.titleDecodeValue like ? ",s.push(`%${g}%`)):(n+=` and d.${p}=? `,s.push(g)))});let u=`
-                    SELECT
-                        b.name as className,d.id,d.title,d.tags,d.key,d.create_time,d.readTop,d.classId
-                    FROM
-                        ${Zt} AS d
-                    LEFT JOIN 
-                        tb_blog_class as b on b.id=d.classId
-                        ${n} 
-                    ORDER BY d.id DESC LIMIT ? OFFSET ?
-                    `;e.open();let d=await e.query(u,[...s,l,c]);d.map(p=>{p.create_time=_(p.create_time,"YYYY-MM-DD HH:mm:ss")});let h={total:(await e.query(`SELECT COUNT(d.id) AS total FROM ${Zt} AS d ${n}`,s))[0].total,pageSize:l,pageIndex:i};return e.close(),t.sendSuccess({message:"success",result:d,page:h})}catch(l){return e.close(),t.sendError(l)}});var tr=er;var ue="tb_blog_class",Re=["name","sort"],xe={conf_uuidName:"id",conf_tableName:ue,conf_tableColumns:Re};var V="id",F=ue,rr=Re,j=new w;j.get("/",async t=>{let e=new m;e.init(t.env);let r=[],s=[],n="where 1=1",a,o;try{let{pageSize:l,pageRowNum:c,pageIndex:i}=t.getValuesPage();r=[V,"searchText"],r.map(p=>{let g=t.getValueById(p);S(g)&&(p==="searchText"?(n+=" and d.name like ? ",s.push(`%${g}%`)):(n+=` and d.${p}=? `,s.push(g)))});let u=`
-                    SELECT
-                        d.*
-                    FROM
-                        ${F} AS d
-                        ${n} 
-                    ORDER BY d.sort ASC LIMIT ? OFFSET ?
-                    `;e.open();let d=await e.query(u,[...s,l,c]),h={total:(await e.query(`SELECT COUNT(d.${V}) AS total FROM ${F} AS d ${n}`,s))[0].total,pageSize:l,pageIndex:i};return e.close(),t.sendSuccess({message:"success",result:d,page:h})}catch(l){return e.close(),t.sendError(l)}});j.get("/getMaxSortNumber",async t=>{let e=new m;e.init(t.env);let r=[],s=[],n="where 1=1",a,o;try{let{pageSize:l,pageRowNum:c,pageIndex:i}=t.getValuesPage();r=[],r.map(f=>{let h=t.getValueById(f);S(h)&&(n+=` and d.${f}=? `,s.push(h))});let u=`
-                    SELECT
-                        d.${V},d.name,d.sortax(d.sort) AS sort
-                    FROM
-                        ${F} AS d
-                        ${n} 
-                    ORDER BY d.sort DESC LIMIT ? OFFSET ?
-                    `;e.open();let d=await e.query(u,[...s,l,c]);return e.close(),t.sendSuccess({message:"success",result:d})}catch(l){return e.close(),t.sendError(l)}});j.post("/",async t=>{let e=new m;e.init(t.env);let r=rr,s,n="where 1=1",a,o;try{return s=t.getValueByIdToArray(r),o=`
-                    insert into ${F}
-                        (${r.join(",")},create_time)
-                    values
-                        (${r.map(l=>"?").join(",")},${Date.now()})
-                    `,await e.query(o,s),e.close(),t.sendSuccess()}catch(l){return e.close(),t.sendError(l)}});j.put("/",async t=>{let e=new m;e.init(t.env);let r=rr,s,n,a="where 1=1",o;try{let l=t.getValueById(V);return s=t.getValueByIdToArray(r),n=r.map(c=>`${c}=?`).join(","),s.push(l),a+=` and ${V}=? `,o=`update ${F} set ${n} ${a}`,e.open(),await e.query(o,s),e.close(),t.sendSuccess({message:"success"})}catch(l){return e.close(),t.sendError(l)}});j.delete("/",async t=>{let e=new m;e.init(t.env);let r=[],s,n="where 1=1",a;try{let o=t.getValueById(V);return r=[V],s=t.getValueByIdToArray(r),r.map(l=>{n+=` and ${l}=? `}),a=`delete from ${F} ${n}`,e.open(),await e.query(a,s),e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});j.delete("/multiple",async t=>{let e=new m;e.init(t.env);let r=[],s,n="where 1=1",a;try{if(r=[],s=t.getValues(),R(s)!=="Array")throw new Error("\u53C2\u6570\u9519\u8BEF");e.open();for await(let o of s)n=` where 1=1 and ${V}=? `,a=`delete from ${F} ${n}`,await e.query(a,[o]);return e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});var sr=j;var Ke="tb_notepad",Ge=["contentDecodeValue","content","key"],nr={conf_uuidName:"id",conf_tableName:Ke,conf_tableColumns:Ge};var P="id",Q=Ke,Je=Ge,X=new w;X.get("/",async t=>{let e=new m;e.init(t.env);let r=[],s=[],n="where 1=1",a,o;try{let{pageSize:l,pageRowNum:c,pageIndex:i}=t.getValuesPage();r=[P,"searchText"],r.map(p=>{let g=t.getValueById(p);S(g)&&(p==="searchText"?(n+=" and d.contentDecodeValue like ? ",s.push(`%${g}%`)):(n+=` and d.${p}=? `,s.push(g)))});let u=`
-                    SELECT
-                        d.${P},d.${Je.filter(p=>p!=="contentDecodeValue").join(",d.")},d.create_time
-                    FROM
-                        ${Q} AS d
-                        ${n} 
-                    ORDER BY d.${P} DESC LIMIT ? OFFSET ?
-                    `;e.open();let d=await e.query(u,[...s,l,c]);d.map(p=>{p.create_time=_(p.create_time,"YYYY-MM-DD HH:mm:ss")});let h={total:(await e.query(`SELECT COUNT(d.${P}) AS total FROM ${Q} AS d ${n}`,s))[0].total,pageSize:l,pageIndex:i};return e.close(),t.sendSuccess({message:"success",result:d,page:h})}catch(l){return e.close(),t.sendError(l)}});X.post("/",async t=>{let e=new m;e.init(t.env);let r=Je,s,n="WHERE 1=1",a,o;try{let l=t.getValues(),{content:c,key:i}=l,u=D(i,c);return l.contentDecodeValue=u,s=t.getValueByIdToArray(r),o=`
-                    insert into ${Q}
-                        (${r.join(",")},create_time)
-                    values
-                        (${r.map(d=>"?").join(",")},${Date.now()})
-                    `,await e.query(o,s),e.close(),t.sendSuccess()}catch(l){return e.close(),t.sendError(l)}});X.put("/",async t=>{let e=new m;e.init(t.env);let r=Je,s,n="WHERE 1=1",a,o;try{let l=t.getValueById(P),c=t.getValues(),{content:i,key:u}=c,d=D(u,i);return c.contentDecodeValue=d,s=t.getValueByIdToArray(r),a=r.map(f=>`${f}=?`).join(","),a+=",update_time=?",s.push(Date.now()),n+=` and ${P}=? `,s.push(l),o=`update ${Q} set ${a} ${n}`,e.open(),await e.query(o,s),e.close(),t.sendSuccess({message:"success"})}catch(l){return e.close(),t.sendError(l)}});X.delete("/",async t=>{let e=new m;e.init(t.env);let r=[],s,n="WHERE 1=1",a;try{return r=[P],s=t.getValueByIdToArray(r),r.map(o=>{n+=` AND ${o}=? `}),a=`delete from ${Q} ${n}`,e.open(),await e.query(a,s),e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});X.delete("/multiple",async t=>{let e=new m;e.init(t.env);let r=[],s,n="where 1=1",a;try{if(r=[],s=t.getValues(),R(s)!=="Array")throw new Error("\u53C2\u6570\u9519\u8BEF");e.open();for await(let o of s)n=` where 1=1 and ${P}=? `,a=`delete from ${Q} ${n}`,await e.query(a,[o]);return e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});var ar=X;var Qe="tb_friendly_link",Xe=["name","target","link_url","sort"],Ze={conf_uuidName:"id",conf_tableName:Qe,conf_tableColumns:Xe};var L="id",k=Qe,et=Xe,W=new w;W.get("/",async t=>{let e=new m;e.init(t.env);let r=[],s=[],n="where 1=1",a,o;try{let{pageSize:l,pageRowNum:c,pageIndex:i}=t.getValuesPage();r=[L,"searchText"],r.map(p=>{let g=t.getValueById(p);if(S(g))switch(p){case"searchText":n+=" and d.name like ? ",s.push(`%${g}%`);default:n+=` and d.${p}=? `,s.push(g);break}});let u=`
-                    SELECT
-                        d.${L},d.${et.filter(p=>p!=="a").join(",d.")},d.create_time
-                    FROM
-                        ${k} AS d
-                        ${n} 
-                    ORDER BY d.sort DESC LIMIT ? OFFSET ?
-                    `;e.open();let d=await e.query(u,[...s,l,c]);d.map(p=>{p.create_time=_(p.create_time,"YYYY-MM-DD HH:mm:ss")});let h={total:(await e.query(`SELECT COUNT(d.${L}) AS total FROM ${k} AS d ${n}`,s))[0].total,pageSize:l,pageIndex:i};return e.close(),t.sendSuccess({message:"success",result:d,page:h})}catch(l){return e.close(),t.sendError(l)}});W.get("/getMaxSortNumber",async t=>{let e=new m;e.init(t.env);let r=[],s=[],n="where 1=1",a,o;try{let{pageSize:l,pageRowNum:c,pageIndex:i}=t.getValuesPage();r=[],r.map(f=>{let h=t.getValueById(f);S(h)&&(n+=` and d.${f}=? `,s.push(h))});let u=`
-                    SELECT
-                        d.id,max(d.sort) AS sortNumber
-                    FROM
-                        ${k} AS d
-                        ${n} 
-                    ORDER BY d.sort DESC LIMIT ? OFFSET ?
-                    `;e.open();let d=await e.query(u,[...s,l,c]);return e.close(),t.sendSuccess({message:"success",result:d})}catch(l){return e.close(),t.sendError(l)}});W.post("/",async t=>{let e=new m;e.init(t.env);let r=et,s,n="WHERE 1=1",a,o;try{return s=t.getValueByIdToArray(r),o=`
-                    insert into ${k}
-                        (${r.join(",")},create_time)
-                    values
-                        (${r.map(l=>"?").join(",")},${Date.now()})
-                    `,await e.query(o,s),e.close(),t.sendSuccess()}catch(l){return e.close(),t.sendError(l)}});W.put("/",async t=>{let e=new m;e.init(t.env);let r=et,s,n="WHERE 1=1",a,o;try{let l=t.getValueById(L);return s=t.getValueByIdToArray(r),a=r.map(c=>`${c}=?`).join(","),n+=` and ${L}=? `,s.push(l),o=`update ${k} set ${a} ${n}`,e.open(),await e.query(o,s),e.close(),t.sendSuccess({message:"success"})}catch(l){return e.close(),t.sendError(l)}});W.delete("/",async t=>{let e=new m;e.init(t.env);let r=[],s,n="WHERE 1=1",a;try{return r=[L],s=t.getValueByIdToArray(r),r.map(o=>{n+=` AND ${o}=? `}),a=`delete from ${k} ${n}`,e.open(),await e.query(a,s),e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});W.delete("/multiple",async t=>{let e=new m;e.init(t.env);let r=[],s,n="where 1=1",a;try{if(r=[],s=t.getValues(),R(s)!=="Array")throw new Error("\u53C2\u6570\u9519\u8BEF");e.open();for await(let o of s)n=` where 1=1 and ${L}=? `,a=`delete from ${k} ${n}`,await e.query(a,[o]);return e.close(),t.sendSuccess()}catch(o){return e.close(),t.sendError(o)}});var or=W;var ds="tb_database_backup",fs=["name","size","path","md5"],de={conf_uuidName:"id",conf_tableName:ds,conf_tableColumns:fs};async function lr(t,e,r){let s=r;if(!s)throw new Error("\u7F3A\u5C11\u5FC5\u8981\u53C2\u6570");try{await t.MY_BUCKET_DATABASE.put(s,e,{httpMetadata:{contentType:e.type,cacheControl:"public, max-age=3600"}})}catch(n){throw n}}async function tt(t,e){let r=e;if(!r)throw new Error("\u7F3A\u5C11\u5FC5\u8981\u53C2\u6570");try{await t.MY_BUCKET_DATABASE.delete(r)}catch{}}async function ir(t,e){let{conf_uuidName:r,conf_tableName:s,conf_tableColumns:n}=de,a=r,o=s,l=n,c=[],i="WHERE 1=1",u,d=["tempfilter"];try{let{pageSize:f,pageRowNum:h,pageIndex:p}=t.getValuesPage();l=[a,"searchText"],l.map(y=>{let C=t.getValueById(y);if(S(C))switch(y){case"searchText":i+=" and d.name like ? ",c.push(`%${C}%`);default:i+=` and d.${y}=? `,c.push(C);break}});let g=`
+                        (${sqlFields.map((item) => {
+      return "?";
+    }).join(",")},${Date.now()})
+                    `;
+    await classDBConnection.query(sqlValue, sqlParams);
+    classDBConnection.close();
+    return c.sendSuccess();
+  } catch (error) {
+    classDBConnection.close();
+    return c.sendError(error);
+  }
+});
+router4.put("/", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  let sqlFields = tableColumns, sqlParams, sqlWhere = "where 1=1", sqlSpace, sqlValue;
+  try {
+    const uuid = c.getValueById(uuidName);
+    const { username, password } = c.getValues();
+    if (isValidValue(password)) {
+      const hashedPassword = await md5(password);
+      sqlParams = [username, hashedPassword];
+    } else {
+      sqlFields = ["username"];
+      sqlParams = [username];
+    }
+    sqlParams.push(uuid);
+    sqlSpace = sqlFields.map((item) => {
+      return `${item}=?`;
+    }).join(",");
+    sqlWhere += ` and ${uuidName}=? `;
+    sqlValue = `update ${tableName2} set ${sqlSpace} ${sqlWhere}`;
+    classDBConnection.open();
+    await classDBConnection.query(sqlValue, sqlParams);
+    classDBConnection.close();
+    return c.sendSuccess({ message: "success" });
+  } catch (error) {
+    classDBConnection.close();
+    return c.sendError(error);
+  }
+});
+router4.delete("/", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  let sqlFields = tableColumns, sqlParams, sqlWhere = "where 1=1", sqlValue;
+  try {
+    const uuid = c.getValueById(uuidName);
+    sqlFields = [uuidName];
+    sqlParams = c.getValueByIdToArray(sqlFields);
+    sqlFields.map((item) => {
+      sqlWhere += ` and ${item}=? `;
+    });
+    sqlValue = `delete from ${tableName2} ${sqlWhere}`;
+    classDBConnection.open();
+    await classDBConnection.query(sqlValue, sqlParams);
+    classDBConnection.close();
+    return c.sendSuccess();
+  } catch (error) {
+    classDBConnection.close();
+    return c.sendError(error);
+  }
+});
+router4.delete("/multiple", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  let sqlFields = tableColumns, sqlParams, sqlWhere = "where 1=1", sqlValue;
+  try {
+    sqlFields = [];
+    sqlParams = c.getValues();
+    if (getType(sqlParams) !== "Array") {
+      throw new Error("\u53C2\u6570\u9519\u8BEF");
+    }
+    classDBConnection.open();
+    for await (const element of sqlParams) {
+      sqlWhere = ` where 1=1 and ${uuidName}=? `;
+      sqlValue = `delete from ${tableName2} ${sqlWhere}`;
+      await classDBConnection.query(sqlValue, [element]);
+    }
+    classDBConnection.close();
+    return c.sendSuccess();
+  } catch (error) {
+    classDBConnection.close();
+    return c.sendError(error);
+  }
+});
+var admin_default = router4;
+
+// src/api/admin/database.config.js
+var conf_uuidName2 = "id";
+var conf_tableName2 = "tb_database_backup";
+var conf_tableColumns2 = [
+  "name",
+  "size",
+  "path",
+  "md5"
+];
+var database_config_default = {
+  conf_uuidName: conf_uuidName2,
+  conf_tableName: conf_tableName2,
+  conf_tableColumns: conf_tableColumns2
+};
+
+// src/utils/cloudflare/bucket_database.js
+async function putObject(env, file, filename) {
+  const objectKey = filename;
+  if (!objectKey) {
+    throw new Error("\u7F3A\u5C11\u5FC5\u8981\u53C2\u6570");
+  }
+  try {
+    await env.MY_BUCKET_DATABASE.put(objectKey, file, {
+      httpMetadata: {
+        contentType: file.type,
+        cacheControl: "public, max-age=3600"
+      }
+    });
+  } catch (error) {
+    throw error;
+  }
+}
+async function deleteObject(env, filename) {
+  const objectKey = filename;
+  if (!objectKey) {
+    throw new Error("\u7F3A\u5C11\u5FC5\u8981\u53C2\u6570");
+  }
+  try {
+    await env.MY_BUCKET_DATABASE.delete(objectKey);
+  } catch (error) {
+  }
+}
+
+// src/api/admin/databaseHandle.js
+async function handleGet(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8, conf_tableColumns: conf_tableColumns8 } = database_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = conf_tableColumns8, sqlParams = [], sqlWhere = "WHERE 1=1", sqlValue, sqlColumnsFilters = ["tempfilter"];
+  try {
+    let { pageSize, pageRowNum, pageIndex } = c.getValuesPage();
+    sqlFields = [uuidName3, "searchText"];
+    sqlFields.map((item) => {
+      const value = c.getValueById(item);
+      if (isValidValue(value)) {
+        switch (item) {
+          case "searchText":
+            sqlWhere += ` and d.name like ? `;
+            sqlParams.push(`%${value}%`);
+          default:
+            sqlWhere += ` and d.${item}=? `;
+            sqlParams.push(value);
+            break;
+        }
+      }
+    });
+    let sqlValue2 = `
                         SELECT
-                            d.${a},d.${n.filter(y=>!d.includes(y)).join(",d.")},d.create_time
+                            d.${uuidName3},d.${conf_tableColumns8.filter((item) => !sqlColumnsFilters.includes(item)).join(",d.")},d.create_time
                         FROM
-                            ${o} AS d
-                            ${i} 
-                        ORDER BY d.${a} DESC LIMIT ? OFFSET ?
-                        `;e.open();let E=await e.query(g,[...c,f,h]);E.map(y=>{y.create_time=_(y.create_time,"YYYY-MM-DD HH:mm:ss")});let x={total:(await e.query(`SELECT COUNT(d.${a}) AS total FROM ${o} AS d ${i}`,c))[0].total,pageSize:f,pageIndex:p};return{result:E,page:x}}catch(f){throw f}}async function cr(t,e){let{conf_uuidName:r,conf_tableName:s,conf_tableColumns:n}=de,a=r,o=s,l=n,c,i;try{let u=await e.exportSql(),d=`${_(Date.now(),"YYYYMMDDHHmmss")}`,f=new Blob([u],{type:"application/sql",lastModified:Date.now()}),h=await At(f);if(i=`
+                            ${tableName4} AS d
+                            ${sqlWhere} 
+                        ORDER BY d.${uuidName3} DESC LIMIT ? OFFSET ?
+                        `;
+    classDBConnection.open();
+    let result = await classDBConnection.query(sqlValue2, [...sqlParams, pageSize, pageRowNum]);
+    result.map((item) => {
+      item.create_time = getCurrentDate(item.create_time, "YYYY-MM-DD HH:mm:ss");
+    });
+    const pageResult = await classDBConnection.query(`SELECT COUNT(d.${uuidName3}) AS total FROM ${tableName4} AS d ${sqlWhere}`, sqlParams);
+    const page = {
+      total: pageResult[0]["total"],
+      pageSize,
+      pageIndex
+    };
+    return {
+      result,
+      page
+    };
+  } catch (error) {
+    throw error;
+  }
+}
+async function handlePost(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8, conf_tableColumns: conf_tableColumns8 } = database_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = conf_tableColumns8, sqlParams, sqlValue;
+  try {
+    let sqlText = await classDBConnection.exportSql();
+    const filename = `${getCurrentDate(Date.now(), "YYYYMMDDHHmmss")}`;
+    const file = new Blob([sqlText], {
+      type: "application/sql",
+      lastModified: Date.now()
+    });
+    const md52 = await toMd5(file);
+    sqlValue = `
                     SELECT
                         d.md5
                     FROM
-                        ${o} AS d
+                        ${tableName4} AS d
                     WHERE
                         d.md5 = ?
-                    `,(await e.query(i,[h],!1)).length>0)throw new Error("\u6570\u636E\u5E93\u5907\u4EFD\u6587\u4EF6\u5DF2\u5B58\u5728");await lr(t.env,f,h),c=[d,Dt(f.size),`/${h}`,h],i=`
-                    insert into ${o}
-                        (${l.join(",")},create_time)
+                    `;
+    let result = await classDBConnection.query(sqlValue, [md52], false);
+    if (result.length > 0) {
+      throw new Error("\u6570\u636E\u5E93\u5907\u4EFD\u6587\u4EF6\u5DF2\u5B58\u5728");
+    }
+    await putObject(c.env, file, md52);
+    sqlParams = [filename, formatFileSize(file.size), `/${md52}`, md52];
+    sqlValue = `
+                    insert into ${tableName4}
+                        (${sqlFields.join(",")},create_time)
                     values
-                        (${l.map(g=>"?").join(",")},${Date.now()})
-                    `,await e.query(i,c)}catch(u){throw u}}async function ur(t,e){let r=[],s;try{try{await e.exec("COMMIT;")}catch(n){n.message.includes("no transaction is active")}s="VACUUM;",await e.exec(s)}catch(n){throw n}}async function dr(t,e){let{conf_uuidName:r,conf_tableName:s}=de,n=r,a=s,o=[],l,c="WHERE 1=1",i;try{o=[n],l=t.getValueByIdToArray(o),i=`
+                        (${sqlFields.map((item) => {
+      return "?";
+    }).join(",")},${Date.now()})
+                    `;
+    await classDBConnection.query(sqlValue, sqlParams);
+  } catch (error) {
+    throw error;
+  }
+}
+async function handlePostVacuum(c, classDBConnection) {
+  let sqlParams = [], sqlValue;
+  try {
+    try {
+      await classDBConnection.exec("COMMIT;");
+      console.log("\u5C1D\u8BD5\u63D0\u4EA4\u4E4B\u524D\u53EF\u80FD\u672A\u63D0\u4EA4\u7684\u4E8B\u52A1.");
+    } catch (commitError) {
+      if (!commitError.message.includes("no transaction is active")) {
+        console.warn("\u5C1D\u8BD5\u63D0\u4EA4\u4E8B\u52A1\u65F6\u9047\u5230\u5176\u4ED6\u9519\u8BEF:", commitError.message);
+      }
+    }
+    sqlValue = `VACUUM;`;
+    await classDBConnection.exec(sqlValue);
+  } catch (error) {
+    throw error;
+  }
+}
+async function handleDelete(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8 } = database_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = [], sqlParams, sqlWhere = "WHERE 1=1", sqlValue;
+  try {
+    sqlFields = [uuidName3];
+    sqlParams = c.getValueByIdToArray(sqlFields);
+    sqlValue = `
                 SELECT
-                    d.${n},d.md5
+                    d.${uuidName3},d.md5
                 FROM
-                    ${a} AS d
-                    ${c} 
-                `,e.open();let u=await e.query(i,[...l]);if(u.length===0)throw new Error("\u6570\u636E\u4E0D\u5B58\u5728");let d=u[0].md5;await tt(t.env,d),c=" where 1=1 ",o=[n],l=t.getValueByIdToArray(o),o.map(f=>{c+=` AND ${f}=? `}),i=`delete from ${a} ${c}`,await e.query(i,l)}catch(u){throw u}}async function fr(t,e){let{conf_uuidName:r,conf_tableName:s}=de,n=r,a=s,o=[],l,c="where 1=1",i;try{if(o=[],l=t.getValues(),R(l)!=="Array")throw new Error("\u53C2\u6570\u9519\u8BEF");for await(let u of l){c=` where ${n}=? `,i=`
+                    ${tableName4} AS d
+                    ${sqlWhere} 
+                `;
+    classDBConnection.open();
+    let result = await classDBConnection.query(sqlValue, [...sqlParams]);
+    if (result.length === 0) {
+      throw new Error("\u6570\u636E\u4E0D\u5B58\u5728");
+    }
+    const filename = result[0]["md5"];
+    await deleteObject(c.env, filename);
+    sqlWhere = ` where 1=1 `;
+    sqlFields = [uuidName3];
+    sqlParams = c.getValueByIdToArray(sqlFields);
+    sqlFields.map((item) => {
+      sqlWhere += ` AND ${item}=? `;
+    });
+    sqlValue = `delete from ${tableName4} ${sqlWhere}`;
+    await classDBConnection.query(sqlValue, sqlParams);
+  } catch (error) {
+    throw error;
+  }
+}
+async function handleDeleteMultiple(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8 } = database_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = [], sqlParams, sqlWhere = "where 1=1", sqlValue;
+  try {
+    sqlFields = [];
+    sqlParams = c.getValues();
+    if (getType(sqlParams) !== "Array") {
+      throw new Error("\u53C2\u6570\u9519\u8BEF");
+    }
+    for await (const element of sqlParams) {
+      sqlWhere = ` where ${uuidName3}=? `;
+      sqlValue = `
                 SELECT
-                    d.${n},d.md5
+                    d.${uuidName3},d.md5
                 FROM
-                    ${a} AS d
-                    ${c} 
-                `;let d=await e.query(i,[u]);if(d.length===0)continue;let f=d[0].md5;await tt(t.env,f),c=` where ${n}=? `,i=`delete from ${a} ${c}`,await e.query(i,[u])}}catch(u){throw u}}var Z=new w;Z.get("/",async t=>{let e=new m;e.init(t.env),e.open();try{let r=await ir(t,e);return e.close(),t.sendSuccess(r)}catch(r){throw e.close(),r}});Z.post("/",async t=>{let e=new m;e.init(t.env),e.open();try{return await cr(t,e),e.close(),t.sendSuccess()}catch(r){return e.close(),t.sendError(r)}});Z.post("/Vacuum",async t=>{let e=new m;e.init(t.env),e.open();try{return await ur(t,e),e.close(),t.sendSuccess()}catch(r){return e.close(),t.sendError(r)}});Z.delete("/",async t=>{let e=new m;e.init(t.env),e.open();try{return await dr(t,e),e.close(),t.sendSuccess()}catch(r){throw e.close(),r}});Z.delete("/multiple",async t=>{let e=new m;e.init(t.env),e.open();try{return await fr(t,e),e.close(),t.sendSuccess()}catch(r){throw e.close(),r}});var hr=Z;async function pr(t,e){let{conf_uuidName:r,conf_tableName:s}=xe,n=r,a=s,o=[],l=[],c;try{return c=`
+                    ${tableName4} AS d
+                    ${sqlWhere} 
+                `;
+      let result = await classDBConnection.query(sqlValue, [element]);
+      if (result.length === 0) {
+        continue;
+      }
+      const filename = result[0]["md5"];
+      await deleteObject(c.env, filename);
+      sqlWhere = ` where ${uuidName3}=? `;
+      sqlValue = `delete from ${tableName4} ${sqlWhere}`;
+      await classDBConnection.query(sqlValue, [element]);
+    }
+  } catch (error) {
+    throw error;
+  }
+}
+
+// src/api/admin/database.js
+var router5 = new Hono2();
+router5.get("/", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  classDBConnection.open();
+  try {
+    const result = await handleGet(c, classDBConnection);
+    classDBConnection.close();
+    return c.sendSuccess(result);
+  } catch (error) {
+    classDBConnection.close();
+    throw error;
+  }
+});
+router5.post("/", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  classDBConnection.open();
+  try {
+    await handlePost(c, classDBConnection);
+    classDBConnection.close();
+    return c.sendSuccess();
+  } catch (error) {
+    classDBConnection.close();
+    return c.sendError(error);
+  }
+});
+router5.post("/Vacuum", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  classDBConnection.open();
+  try {
+    await handlePostVacuum(c, classDBConnection);
+    classDBConnection.close();
+    return c.sendSuccess();
+  } catch (error) {
+    classDBConnection.close();
+    return c.sendError(error);
+  }
+});
+router5.delete("/", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  classDBConnection.open();
+  try {
+    await handleDelete(c, classDBConnection);
+    classDBConnection.close();
+    return c.sendSuccess();
+  } catch (error) {
+    classDBConnection.close();
+    throw error;
+  }
+});
+router5.delete("/multiple", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  classDBConnection.open();
+  try {
+    await handleDeleteMultiple(c, classDBConnection);
+    classDBConnection.close();
+    return c.sendSuccess();
+  } catch (error) {
+    classDBConnection.close();
+    throw error;
+  }
+});
+var database_default = router5;
+
+// src/api/admin/blogClass.config.js
+var conf_uuidName3 = "id";
+var conf_tableName3 = "tb_blog_class";
+var conf_tableColumns3 = [
+  "name",
+  "sort"
+];
+var blogClass_config_default = {
+  conf_uuidName: conf_uuidName3,
+  conf_tableName: conf_tableName3,
+  conf_tableColumns: conf_tableColumns3
+};
+
+// src/api/admin/blogs.config.js
+var conf_uuidName4 = "id";
+var conf_tableName4 = "tb_blogs";
+var conf_tableColumns4 = [
+  "title",
+  "titleDecodeValue",
+  "tags",
+  "jianshu",
+  "content",
+  "classId",
+  "key",
+  "readTop",
+  "readCount"
+];
+var blogs_config_default = {
+  conf_uuidName: conf_uuidName4,
+  conf_tableName: conf_tableName4,
+  conf_tableColumns: conf_tableColumns4
+};
+
+// src/api/admin/notepad.config.js
+var conf_uuidName5 = "id";
+var conf_tableName5 = "tb_notepad";
+var conf_tableColumns5 = [
+  "contentDecodeValue",
+  "content",
+  "key"
+];
+var notepad_config_default = {
+  conf_uuidName: conf_uuidName5,
+  conf_tableName: conf_tableName5,
+  conf_tableColumns: conf_tableColumns5
+};
+
+// src/api/admin/link.config.js
+var conf_uuidName6 = "id";
+var conf_tableName6 = "tb_friendly_link";
+var conf_tableColumns6 = [
+  "name",
+  "target",
+  "link_url",
+  "sort"
+];
+var link_config_default = {
+  conf_uuidName: conf_uuidName6,
+  conf_tableName: conf_tableName6,
+  conf_tableColumns: conf_tableColumns6
+};
+
+// src/api/admin/pageWelcomeHandle.js
+async function handleBlogClassTotal(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8 } = blogClass_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = [], sqlParams = [], sqlValue;
+  try {
+    sqlValue = `
                 SELECT
-                    count(d.${n}) AS total
+                    count(d.${uuidName3}) AS total
                 FROM
-                    ${a} AS d
-                `,(await e.query(c,[...l]))[0].total}catch(i){throw i}}async function mr(t,e){let{conf_uuidName:r,conf_tableName:s}=B,n=r,a=s,o=[],l=[],c;try{return c=`
+                    ${tableName4} AS d
+                `;
+    const result = await classDBConnection.query(sqlValue, [...sqlParams]);
+    return result[0]["total"];
+  } catch (error) {
+    throw error;
+  }
+}
+async function handleBlogTotal(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8 } = blogs_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = [], sqlParams = [], sqlValue;
+  try {
+    sqlValue = `
                 SELECT
-                    count(d.${n}) AS total
+                    count(d.${uuidName3}) AS total
                 FROM
-                    ${a} AS d
-                `,(await e.query(c,[...l]))[0].total}catch(i){throw i}}async function gr(t,e){let{conf_uuidName:r,conf_tableName:s}=nr,n=r,a=s,o=[],l=[],c;try{return c=`
+                    ${tableName4} AS d
+                `;
+    const result = await classDBConnection.query(sqlValue, [...sqlParams]);
+    return result[0]["total"];
+  } catch (error) {
+    throw error;
+  }
+}
+async function handleNotepadTotal(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8 } = notepad_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = [], sqlParams = [], sqlValue;
+  try {
+    sqlValue = `
                 SELECT
-                    count(d.${n}) AS total
+                    count(d.${uuidName3}) AS total
                 FROM
-                    ${a} AS d
-                `,(await e.query(c,[...l]))[0].total}catch(i){throw i}}async function yr(t,e){let{conf_uuidName:r,conf_tableName:s}=Ze,n=r,a=s,o=[],l=[],c;try{return c=`
+                    ${tableName4} AS d
+                `;
+    const result = await classDBConnection.query(sqlValue, [...sqlParams]);
+    return result[0]["total"];
+  } catch (error) {
+    throw error;
+  }
+}
+async function handleLinkTotal(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8 } = link_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = [], sqlParams = [], sqlValue;
+  try {
+    sqlValue = `
                 SELECT
-                    count(d.${n}) AS total
+                    count(d.${uuidName3}) AS total
                 FROM
-                    ${a} AS d
-                `,(await e.query(c,[...l]))[0].total}catch(i){throw i}}async function wr(t,e){let{conf_uuidName:r,conf_tableName:s}=B,n=r,a=s,o=[],l=[],c="WHERE 1=1",i;try{let u=Date.now();return l=[je(u,"1y"),u],i=`
+                    ${tableName4} AS d
+                `;
+    const result = await classDBConnection.query(sqlValue, [...sqlParams]);
+    return result[0]["total"];
+  } catch (error) {
+    throw error;
+  }
+}
+async function handleBlogAddDateCount(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8 } = blogs_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = [], sqlParams = [], sqlWhere = "WHERE 1=1", sqlValue;
+  try {
+    const endDate = Date.now();
+    const startDate = getDatePrevious(endDate, "1y");
+    sqlParams = [startDate, endDate];
+    sqlValue = `
                 SELECT 
                     strftime('%Y-%m', datetime(create_time / 1000, 'unixepoch', 'localtime')) AS publish_date,
                     COUNT(id) AS publish_count
-                FROM ${a} 
+                FROM ${tableName4} 
                 WHERE 
                     create_time >= ?
                     AND create_time <= ?
                 GROUP BY strftime('%Y-%m', datetime(create_time / 1000, 'unixepoch', 'localtime'))
                 ORDER BY publish_date;
-                `,await e.query(i,l,!1)}catch(u){throw u}}async function Er(t,e){let{conf_uuidName:r,conf_tableName:s}=Ze,n=r,a=s,o=[],l=[],c="WHERE 1=1",i;try{let u=Date.now(),d=je(u,"1M");return l=[],i=`
+                `;
+    const result = await classDBConnection.query(sqlValue, sqlParams, false);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+async function handleBlogClassCount(c, classDBConnection) {
+  const { conf_uuidName: conf_uuidName8, conf_tableName: conf_tableName8 } = link_config_default;
+  const uuidName3 = conf_uuidName8;
+  const tableName4 = conf_tableName8;
+  let sqlFields = [], sqlParams = [], sqlWhere = "WHERE 1=1", sqlValue;
+  try {
+    const endDate = Date.now();
+    const startDate = getDatePrevious(endDate, "1M");
+    sqlParams = [];
+    sqlValue = `
                 SELECT 
                     bc.id AS class_id,
                     bc.name AS class_name,
@@ -189,57 +3370,215 @@ PRAGMA foreign_keys = ON;
                     INNER JOIN tb_blogs b ON bc.id = b.classId
                 GROUP BY bc.id, bc.name
                 ORDER BY blog_count DESC, bc.name;
-                `,await e.query(i,[],!1)}catch(u){throw u}}var Sr=new w;Sr.get("/",async t=>{let e=new m;e.init(t.env);let r;try{e.open();let s=await pr(t,e),n=await mr(t,e),a=await gr(t,e),o=await yr(t,e),l=await wr(t,e),c=await Er(t,e);return r={blogClassTotal:s,blogTotal:n,notepadTotal:a,linkTotal:o,blogAddDateCount:l,blogClassCount:c},e.close(),t.sendSuccess(r)}catch(s){throw e.close(),s}});var br=Sr;async function _e(t,e){let{conf_uuidName:r,conf_tableName:s,conf_tableColumns:n}=xe,a=r,o=s,l=n,c=[],i=[],u="WHERE 1=1",d,f;try{let{pageSize:h,pageRowNum:p,pageIndex:g}=t.getValuesPage();h=10,p=0,c=["searchText"],c.map(y=>{let C=t.getValueById(y);S(C)&&(y==="searchText"?(u+=" and d.name like ? ",i.push(`%${C}%`)):(u+=` and d.${y}=? `,i.push(C)))}),f=`
-                SELECT
-                    d.*
-                FROM
-                    ${o} AS d
-                    ${u} 
-                ORDER BY d.sort ASC LIMIT ? OFFSET ?
-                `;let E=await e.query(f,[...i,h,p]),x={total:(await e.query(`SELECT COUNT(d.${a}) AS total FROM ${o} AS d ${u}`,i))[0].total,pageSize:h,pageIndex:g};return{message:"success",result:E,page:x}}catch(h){throw h}}async function Te(t,e){let{conf_uuidName:r,conf_tableName:s,conf_tableColumns:n}=B,a=r,o=s,l=n,c=[],i=[],u="WHERE 1=1",d,f;try{let{pageSize:h,pageRowNum:p,pageIndex:g}=t.getValuesPage();c=["searchText","title","classId","userId"],c.map(y=>{let C=t.getValueById(y);if(S(C))switch(y){case"title":u+=" and d.titleDecodeValue like ? ",i.push(`%${C}%`);break;case"searchText":u+=" and d.titleDecodeValue like ? ",i.push(`%${C}%`);break;case"classId":Ot(C)&&(u+=` and d.${y}=? `,i.push(C));break;default:u+=` and d.${y}=? `,i.push(C);break}}),f=`
-                SELECT
-                    b.name as className,
-                    d.classId,d.id,d.title,d.tags,d.jianshu,d.key,d.readTop,d.create_time
-                FROM
-                    ${o} AS d
-                LEFT JOIN 
-                    tb_blog_class AS b ON b.id=d.classId
-                    ${u} 
-                ORDER BY d.readTop DESC,d.id DESC LIMIT ? OFFSET ?
-                `;let E=await e.query(f,[...i,h,p]);E.map(y=>{y.create_time=_(y.create_time,"YYYY-MM-DD HH:mm:ss")});let x={total:(await e.query(`SELECT COUNT(d.${a}) AS total FROM ${o} AS d ${u}`,i))[0].total,pageSize:h,pageIndex:g};return{message:"success",result:E,page:x}}catch(h){throw h}}async function Cr(t,e){let{conf_uuidName:r,conf_tableName:s,conf_tableColumns:n}=B,a=r,o=s,l=n,c=[],i=[],u="WHERE 1=1",d,f;try{let{pageSize:h,pageRowNum:p,pageIndex:g}=t.getValuesPage();c=[a],c.map(y=>{let C=t.getValueById(y);S(C)&&(u+=` and d.${y}=? `,i.push(C))}),f=`
-                    SELECT
-                        b.name as className,
-                        d.id,d.title,d.tags,d.content,d.key,d.readCount,d.create_time
-                    FROM
-                        ${o} AS d
-                    LEFT JOIN 
-                        tb_blog_class as b on b.id=d.classId 
-                        ${u} 
-                    LIMIT ? OFFSET ?
-                    `;let E=await e.query(f,[...i,h,p]);E.map(y=>{y.create_time=_(y.create_time,"YYYY-MM-DD HH:mm:ss")}),f=`
-                UPDATE ${o} SET 
-                    readCount = readCount+1 
-                WHERE ${a} IN (
-                    SELECT d.${a} FROM ${o} AS d ${u}
-                )
-            `,await e.query(f,i);let x={total:(await e.query(`SELECT COUNT(d.${a}) AS total FROM ${o} AS d ${u}`,i))[0].total,pageSize:h,pageIndex:g};return{message:"success",result:E,page:x}}catch(h){throw h}}async function ee(t,e){let{conf_uuidName:r,conf_tableName:s,conf_tableColumns:n}=B,a=r,o=s,l=n,c=[],i=[],u="WHERE 1=1",d,f;try{let{pageSize:h,pageRowNum:p,pageIndex:g}=t.getValuesPage();c=["classId"],c.map(y=>{let C=t.getValueById(y);S(C)&&(u+=` and d.${y}=? `,i.push(C))}),f=`
-                SELECT
-                    d.id,d.title,d.key
-                FROM
-                    ${o} AS d
-                    ${u} 
-                ORDER BY d.readCount desc,d.readTop DESC LIMIT ? OFFSET ?
-                `;let E=await e.query(f,[...i,h,p]),x={total:(await e.query(`SELECT COUNT(d.${a}) AS total FROM ${o} AS d ${u}`,i))[0].total,pageSize:h,pageIndex:g};return{message:"success",result:E,page:x}}catch(h){throw h}}async function te(t,e){let{conf_uuidName:r,conf_tableName:s,conf_tableColumns:n}=B,a=r,o=s,l=n,c=[],i=[],u="WHERE 1=1",d,f;try{let{pageSize:h,pageRowNum:p,pageIndex:g}=t.getValuesPage();f=`
-                SELECT
-                    d.id,d.name,d.target,d.link_url
-                FROM
-                    tb_friendly_link AS d
-                ORDER BY d.sort desc,d.create_time asc LIMIT ? OFFSET ?
-                `;let E=await e.query(f,[h,p]),x={total:(await e.query(`SELECT COUNT(d.${a}) AS total FROM ${o} AS d ${u}`,i))[0].total,pageSize:h,pageIndex:g};return{message:"success",result:E,page:x}}catch(h){throw h}}var fe=new w;fe.get("/list/jianshu",async t=>{let e=new m;e.init(t.env);try{e.open();let r=await Te(t,e);return e.close(),t.sendSuccess(r)}catch(r){throw e.close(),r}});fe.get("/getBlogReadById",async t=>{let e=new m;e.init(t.env);try{e.open();let r=await Cr(t,e);return e.close(),t.sendSuccess(r)}catch(r){throw e.close(),r}});fe.get("/getBlogClassHot",async t=>{let e=new m;e.init(t.env);try{e.open();let r=await ee(t,e);return e.close(),t.sendSuccess(r)}catch(r){throw e.close(),r}});fe.get("/getLink",async t=>{let e=new m;e.init(t.env);try{e.open();let r=await te(t,e);return e.close(),t.sendSuccess(r)}catch(r){throw e.close(),r}});var qr=fe;var hs="id",Rr=ue;var xr=new w;xr.get("/",async t=>{let e=new m;e.init(t.env);let r=[],s=[],n="where 1=1",a,o;try{let{pageSize:l,pageRowNum:c,pageIndex:i}=t.getValuesPage();r=["searchText"],r.map(h=>{let p=t.getValueById(h);S(p)&&(h==="searchText"?(n+=" and d.name like ? ",s.push(`%${p}%`)):(n+=` and d.${h}=? `,s.push(p)))}),o=`
+                `;
+    const result = await classDBConnection.query(sqlValue, [], false);
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// src/api/admin/pageWelcome.js
+var router6 = new Hono2();
+router6.get("/", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  let result;
+  try {
+    classDBConnection.open();
+    const blogClassTotal = await handleBlogClassTotal(c, classDBConnection);
+    const blogTotal = await handleBlogTotal(c, classDBConnection);
+    const notepadTotal = await handleNotepadTotal(c, classDBConnection);
+    const linkTotal = await handleLinkTotal(c, classDBConnection);
+    const blogAddDateCount = await handleBlogAddDateCount(c, classDBConnection);
+    const blogClassCount = await handleBlogClassCount(c, classDBConnection);
+    result = {
+      blogClassTotal,
+      blogTotal,
+      notepadTotal,
+      linkTotal,
+      blogAddDateCount,
+      blogClassCount
+    };
+    classDBConnection.close();
+    return c.sendSuccess(result);
+  } catch (error) {
+    classDBConnection.close();
+    throw error;
+  }
+});
+var pageWelcome_default = router6;
+
+// src/api/admin/books.config.js
+var conf_uuidName7 = "id";
+var conf_tableName7 = "tb_books";
+
+// src/api/app/books.query.js
+var uuidName2 = conf_uuidName7;
+var tableName3 = conf_tableName7;
+var router7 = new Hono2();
+router7.get("/list", async (c) => {
+  const classDBConnection = new ClassDBConnection_default();
+  classDBConnection.init(c.env);
+  let sqlFields = [], sqlParams = [], sqlWhere = "where 1=1", sqlSpace, sqlValue;
+  try {
+    let { pageSize, pageRowNum, pageIndex } = c.getValuesPage();
+    sqlFields = ["searchText"];
+    sqlFields.map((item) => {
+      const value = c.getValueById(item);
+      if (isValidValue(value)) {
+        if (item === "searchText") {
+          sqlWhere += ` and (d.author like ? or d.title like ?) `;
+          sqlParams.push(`%${value}%`);
+          sqlParams.push(`%${value}%`);
+        } else {
+          sqlWhere += ` and d.${item}=? `;
+          sqlParams.push(value);
+        }
+      }
+    });
+    sqlValue = `
                     SELECT
                         d.*
                     FROM
-                        ${Rr} AS d
-                        ${n} 
-                    ORDER BY d.sort ASC LIMIT ? OFFSET ?
-                    `,e.open();let u=await e.query(o,[...s,l,c]),f={total:(await e.query(`SELECT COUNT(d.${hs}) AS total FROM ${Rr} AS d ${n}`,s))[0].total,pageSize:l,pageIndex:i};return e.close(),t.sendSuccess({message:"success",result:u,page:f})}catch(l){return e.close(),t.sendError(l)}});var _r=xr;var ps=new w;ps.get("/",async t=>{let e=new m;e.init(t.env);let r;try{e.open();let s=await _e(t,e),n=await Te(t,e),a=await ee(t,e),o=await te(t,e);return r={resultNav:s,resultJianShu:n,resultBlogClassHot:a,resultFriendlyLink:o},e.close(),t.sendSuccess(r)}catch(s){throw e.close(),s}});var ms=new w;ms.get("/",async t=>{let e=new m;e.init(t.env);try{e.open();let r=await _e(t,e),s=await s(t,e),n=await ee(t,e),a=await te(t,e),o={resultNav:r,pageHandleBlogsReadById:s,resultBlogClassHot:n,resultFriendlyLink:a};return e.close(),t.sendSuccess(o)}catch(r){throw e.close(),r}});var rt={"/api/test/index":Ht,"/api/test/request":jt,"/api/user":kt,"/api/admin":Ut,"/api/admin/blogs":zt,"/api/admin/blogs/multiple":Xt,"/api/admin/blogs/query":tr,"/api/admin/blogClass":sr,"/api/admin/notepad":ar,"/api/admin/link":or,"/api/admin/database":hr,"/api/admin/welcome":br,"/api/app/blogs/query":qr,"/api/app/blogClass":_r};async function gs(t){t.get("/",s=>s.sendSuccess({message:"Hello, World!"})),Object.keys(rt).forEach(s=>{let n=rt[s];t.route(s,n),t.route(e(s),n),r(s,n)});function e(s){let n=s.toString();if(n.endsWith("/"))n=n.replace(/\/+$/,"");else return`${n}/`;return n}function r(s,n){let a=n.routes||[];a&&a.forEach(o=>{if(o.path.toString().length<=1)return;let l=`${s.replace(/\/+$/,"")}${e(o.path)}`;t[o.method.toLowerCase()](l,o.handler)})}}var Tr=gs;async function ys(t){let e={"Content-Type":"application/json; charset=UTF-8","test-date":Date.now().toString()};t.use("*",async(r,s)=>{r.refHeaders=e,vt(r);let n=new URL(r.req.url),{pathname:a}=n,o=Nt;if(a.startsWith("/api/admin")&&!Vt(r))return r.sendError({message:"\u8BF7\u6C42\u88AB\u62D2\u7EDD\uFF0C\u6388\u6743\u9A8C\u8BC1\u672A\u901A\u8FC7\u3002",status:401});if(await It(r),await s(),!r.res)return new Response(JSON.stringify({message:"is not send response",status:500}),{status:500,headers:e})}),await Tr(t),t.onError((r,s)=>new Response(JSON.stringify({message:"Server Error",status:500}),{status:500,headers:s.refHeaders})),t.notFound(r=>r.sendError({message:"Not Found",status:404}))}var $r=ys;var{corsSwitch:ws}=z,st=new w;ws&&st.use("*",$t({origin:"*"}));await $r(st);var Bl=st;export{Bl as default};
+                        ${tableName3} AS d
+                        ${sqlWhere} 
+                    ORDER BY d.id desc LIMIT ? OFFSET ?
+                    `;
+    classDBConnection.open();
+    let result = await classDBConnection.query(sqlValue, [...sqlParams, pageSize, pageRowNum]);
+    const pageResult = await classDBConnection.query(`SELECT COUNT(d.${uuidName2}) AS total FROM ${tableName3} AS d ${sqlWhere}`, sqlParams);
+    const page = {
+      total: pageResult[0]["total"],
+      pageSize,
+      pageIndex
+    };
+    classDBConnection.close();
+    return c.sendSuccess({
+      message: "success",
+      result,
+      page
+    });
+  } catch (error) {
+    classDBConnection.close();
+    return c.sendError(error);
+  }
+});
+router7.get("/detail", async (c) => {
+  try {
+    let result = { url: c.env.BOOKS_URL };
+    return c.sendSuccess({
+      message: "success",
+      result
+    });
+  } catch (error) {
+    return c.sendError(error);
+  }
+});
+var books_query_default = router7;
+
+// src/filterRouterIndex.js
+var routerIndex = {
+  "/api/test/index": test_default,
+  "/api/test/request": request_default,
+  "/api/user": user_accountVerification_default,
+  "/api/admin": admin_default,
+  "/api/admin/database": database_default,
+  "/api/admin/welcome": pageWelcome_default,
+  "/api/app/books": books_query_default
+};
+
+// src/handle/handleExtendRouter.js
+async function handleExtendRouter(app2) {
+  app2.get("/", (c) => {
+    return c.sendSuccess({ message: "Hello, World!" });
+  });
+  Object.keys(routerIndex).forEach((key) => {
+    const route = routerIndex[key];
+    app2.route(key, route);
+    app2.route(handleRouteSlash(key), route);
+    handleRouteChildrenReg(key, route);
+  });
+  function handleRouteSlash(path) {
+    let refPath = path.toString();
+    if (!refPath.endsWith("/")) {
+      return `${refPath}/`;
+    } else {
+      refPath = refPath.replace(/\/+$/, "");
+    }
+    return refPath;
+  }
+  function handleRouteChildrenReg(path, route) {
+    const childrens = route.routes || [];
+    if (childrens) {
+      childrens.forEach((children) => {
+        if (children.path.toString().length <= 1) {
+          return;
+        }
+        const newKey = `${path.replace(/\/+$/, "")}${handleRouteSlash(children.path)}`;
+        app2[children.method.toLowerCase()](newKey, children.handler);
+      });
+    }
+  }
+}
+var handleExtendRouter_default = handleExtendRouter;
+
+// src/filterGateway.js
+async function filterGateway(app2) {
+  const refHeaders = {
+    "Content-Type": "application/json; charset=UTF-8",
+    "test-date": Date.now().toString()
+  };
+  app2.use("*", async (c, next) => {
+    console.log(`\u8FDB\u5165\u7F51\u5173\u8FC7\u6EE4\u5668\uFF1A[${(/* @__PURE__ */ new Date()).toISOString()}] ${c.req.method} ${c.req.path}`);
+    c.refHeaders = refHeaders;
+    handleExtendBindMessage(c);
+    const url = new URL(c.req.url);
+    const { pathname } = url;
+    const cf_config = SystemConfigCF_default;
+    if (pathname.startsWith("/api/admin")) {
+      const isPass = filterValidToken(c);
+      if (!isPass) {
+        return c.sendError({
+          message: `\u8BF7\u6C42\u88AB\u62D2\u7EDD\uFF0C\u6388\u6743\u9A8C\u8BC1\u672A\u901A\u8FC7\u3002`,
+          status: 401
+        });
+      }
+    }
+    await handleExtendRequest(c);
+    await next();
+    if (!c.res) {
+      return new Response(JSON.stringify({
+        message: `is not send response`,
+        status: 500
+      }), {
+        status: 500,
+        headers: refHeaders
+      });
+    }
+  });
+  await handleExtendRouter_default(app2);
+  app2.onError((err, c) => {
+    console.error(`\u7F51\u5173\u62E6\u622A\u5668\u62A5\u9519`, err);
+    return new Response(JSON.stringify({ message: "Server Error", status: 500 }), {
+      status: 500,
+      headers: c.refHeaders
+    });
+  });
+  app2.notFound((c) => {
+    return c.sendError({ message: "Not Found", status: 404 });
+  });
+}
+var filterGateway_default = filterGateway;
+
+// src/index.js
+var { corsSwitch } = SystemConfig_default;
+var app = new Hono2();
+if (corsSwitch) {
+  app.use("*", cors({ origin: "*" }));
+}
+await filterGateway_default(app);
+var index_default = app;
+export {
+  index_default as default
+};

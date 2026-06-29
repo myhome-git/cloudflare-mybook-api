@@ -2,6 +2,7 @@
 import { build } from 'esbuild';
 import removeConsolePlugin from './remove-console-plugin.js';
 import { readFileSync, writeFileSync } from 'fs';
+import path from 'path';
 
 // 构建配置
 const config = {
@@ -17,6 +18,9 @@ const config = {
   // 定义环境变量
   define: {
     'process.env.NODE_ENV': '"production"'
+  },
+  alias: {
+    '@': path.resolve('./src')
   }
 };
 

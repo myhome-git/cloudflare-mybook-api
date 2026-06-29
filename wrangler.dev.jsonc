@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "worker-mybook",
+  "main": "./dist/index.js",
+  "compatibility_date": "2025-07-26",
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "db_mybook",
+      "database_id": "123456789"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MY_BUCKET_DATABASE",
+      "bucket_name": "bt-mybook-database",
+      "preview_bucket_name": "bt-mybook-database"
+    }
+  ],
+  "vars": {
+    "USER_TOKENS": "123456789",
+    "BOOKS_URL": "https://api.openai.com/v1/chat/completions"
+  }
+}

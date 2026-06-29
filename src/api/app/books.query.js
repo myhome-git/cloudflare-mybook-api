@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
-import ClassDBConnection from '../../utils/db/ClassDBConnection.js';
-import { getType, isValidValue } from '../../utils/utils.js';
-import { conf_uuidName, conf_tableName, conf_tableColumns } from '../admin/books.config.js';
+import ClassDBConnection from '@/utils/db/ClassDBConnection.js';
+import { getType, isValidValue } from '@/utils/utils.js';
+import { conf_uuidName, conf_tableName, conf_tableColumns } from '@/api/admin/books.config.js';
 
 // 定义常量
 const uuidName = conf_uuidName;
@@ -12,7 +12,7 @@ const tableColumns = conf_tableColumns;
 const router = new Hono();
 
 // 处理请求
-router.get('/', async (c) => {
+router.get('/list', async (c) => {
     // 处理业务逻辑
     const classDBConnection = new ClassDBConnection();
     classDBConnection.init(c.env);
@@ -62,6 +62,19 @@ router.get('/', async (c) => {
 
     } catch (error) {
         classDBConnection.close();
+        return c.sendError(error);
+    }
+});
+router.get('/detail', async (c) => {
+    // 处理业务逻辑
+    try {
+        let result = { url: c.env.BOOKS_URL };
+        return c.sendSuccess({
+            message: "success",
+            result: result
+        });
+
+    } catch (error) {
         return c.sendError(error);
     }
 });

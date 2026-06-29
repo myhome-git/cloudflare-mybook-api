@@ -28,7 +28,8 @@
 	"minify": true,
 	// 环境变量配置
 	"vars": {
-		"USER_TOKENS": "123456789"
+		"USER_TOKENS": "123456789",
+		"BOOKS_URL": "https://api.openai.com/v1/chat/completions"
 	},
 	// deploy环境配置
 	"env": {
@@ -49,7 +50,8 @@
 				}
 			],
 			"vars": {
-				"USER_TOKENS": "123456789"
+				"USER_TOKENS": "123456789",
+				"BOOKS_URL": "https://api.openai.com/v1/chat/completions"
 			},
 			"minify": true,
 			"build": {

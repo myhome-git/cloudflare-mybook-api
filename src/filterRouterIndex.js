@@ -12,7 +12,7 @@ export const routerIndex = {
   "/api/admin": Admin,
   "/api/admin/database": AdminDatabase,
   "/api/admin/welcome": AdminPageWelcome,
-  "/api/app/books/query": AppBooksQuery,
+  "/api/app/books": AppBooksQuery,
 };
 
 // // 异步导入模块函数,暂时弃用
